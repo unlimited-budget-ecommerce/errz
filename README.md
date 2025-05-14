@@ -1,0 +1,2 @@
+# errorz
+centralize error library
