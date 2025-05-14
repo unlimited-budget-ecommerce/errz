@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "code",
+      "http_status",
+      "message",
+      "description",
+      "module",
+      "retryable",
+      "severity",
+      "error_type"
+    ],
+    "properties": {
+      "code": { "type": "string" },
+      "http_status": { "type": "integer", "minimum": 100, "maximum": 599 },
+      "message": { "type": "string" },
+      "description": { "type": "string" },
+      "module": { "type": "string" },
+      "retryable": { "type": "boolean" },
+      "severity": { "type": "string", "enum": ["info", "warn", "error"] },
+      "error_type": { "type": "string" }
+    }
+  }
+}
