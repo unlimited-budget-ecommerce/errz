@@ -1,0 +1,38 @@
+{
+  "PM0001": {
+    "domain": "payment",
+    "code": "PM0001",
+    "msg": "payment failed",
+    "cause": "insufficient balance",
+    "http_status": 400,
+    "category": "business",
+    "severity": "medium",
+    "solution": "ask user to top-up balance",
+    "is_retryable": false,
+    "tags": ["payment", "user"]
+  },
+  "PM0002": {
+    "domain": "payment",
+    "code": "PM0002",
+    "msg": "payment timeout",
+    "cause": "provider did not respond in time",
+    "http_status": 504,
+    "category": "timeout",
+    "severity": "high",
+    "solution": "retry after a few seconds",
+    "is_retryable": true,
+    "tags": ["payment", "external", "timeout"]
+  },
+  "PM0003": {
+    "domain": "payment",
+    "code": "PM0003",
+    "msg": "unexpected payment error",
+    "cause": "internal server exception",
+    "http_status": 500,
+    "category": "internal",
+    "severity": "critical",
+    "solution": "check server logs",
+    "is_retryable": false,
+    "tags": ["payment", "internal"]
+  }
+}
