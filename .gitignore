@@ -1,3 +1,4 @@
 cmd/
 docs/
-errors_gen/
+gos/
+example/
