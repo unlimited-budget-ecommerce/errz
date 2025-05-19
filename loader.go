@@ -26,6 +26,7 @@ func LoadAndValidateJSON(schemaPath, jsonPath string) (map[string]ErrorDefinitio
 	if err := json.Unmarshal(data, &errorsMap); err != nil {
 		return nil, fmt.Errorf("failed to parse %s: %w", jsonPath, err)
 	}
+
 	return errorsMap, nil
 }
 

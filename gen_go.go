@@ -65,5 +65,6 @@ func GenerateGoContent(packageName string, errors map[string]ErrorDefinition) (s
 func escape(s string) string {
 	s = strings.ReplaceAll(s, `"`, `\"`)
 	s = strings.ReplaceAll(s, "\n", `\n`)
+
 	return s
 }

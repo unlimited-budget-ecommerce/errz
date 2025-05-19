@@ -1,10 +1,12 @@
 // JUST FOR UNIT TEST
-package utils_test
+package testutils
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/unlimited-budget-ecommerce/errorz"
 )
 
 func WriteTempFile(t *testing.T, name, content string) string {
@@ -15,5 +17,14 @@ func WriteTempFile(t *testing.T, name, content string) string {
 	if err != nil {
 		t.Fatalf("failed to write temp file: %v", err)
 	}
+
 	return path
+}
+
+// Helpers to patch functions inside errorz package (using closures)
+func ResetPatches() {
+	errorz.MkdirAll = os.MkdirAll
+	errorz.WriteToFileFunc = errorz.WriteToFile
+	errorz.GenerateGoContentFunc = errorz.GenerateGoContent
+	errorz.GenerateMarkdownContentFunc = errorz.GenerateMarkdownContent
 }

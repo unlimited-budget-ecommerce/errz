@@ -78,58 +78,15 @@ import (
 )
 
 func main() {
-    schemaPath := "schema/error_schema.json"
-
     // jsonPath should point to your own error definitions JSON file.
     // Replace this with the actual path to your input file.
     jsonPath := "errors/example.json"
 
-    // Step 1: Validate JSON against schema
-    if err := errorz.ValidateJSON(schemaPath, jsonPath); err != nil {
-        fmt.Printf("invalid JSON: %v\n", err)
-        os.Exit(1)
-    }
-
-    // Step 2: Read and parse JSON file
-    data, err := os.ReadFile(jsonPath)
+    // Generate Go code and Markdown
+    err := errorz.GenerateErrorsFromJSON(jsonPath)
     if err != nil {
-        fmt.Printf("failed to read file: %v\n", err)
-        os.Exit(1)
-    }
-
-    var errorMap map[string]errorz.ErrorDefinition
-    if err := json.Unmarshal(data, &errorMap); err != nil {
-        fmt.Printf("failed to parse JSON: %v\n", err)
-        os.Exit(1)
-    }
-
-    if len(errorMap) == 0 {
-        fmt.Println("no errors found in input")
-        os.Exit(1)
-    }
-
-    // Step 3: Group errors by domain
-    domainGroups := make(map[string]map[string]errorz.ErrorDefinition)
-
-    for code, def := range errorMap {
-        if domainGroups[def.Domain] == nil {
-            domainGroups[def.Domain] = make(map[string]errorz.ErrorDefinition)
-        }
-
-        domainGroups[def.Domain][code] = def
-    }
-
-    // Step 4: Generate Go code and Markdown docs per domain
-    for domain, errors := range domainGroups {
-        if err := errorz.WriteGoFile("gos", domain, errors); err != nil {
-            fmt.Printf("failed to write Go file for domain %s: %v\n", domain, err)
-            os.Exit(1)
-        }
-
-        if err := errorz.WriteMarkdown("docs", domain, errors); err != nil {
-            fmt.Printf("failed to write markdown for domain %s: %v\n", domain, err)
-            os.Exit(1)
-        }
+      fmt.Printf("Could not generate error form JSON: %v", err)
+      os.Exit(1)
     }
 
     fmt.Println("Generation completed successfully.")

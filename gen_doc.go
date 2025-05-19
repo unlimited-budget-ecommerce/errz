@@ -1,6 +1,7 @@
 package errorz
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -12,8 +13,14 @@ var (
 	titleCache sync.Map // map[string]string
 )
 
+var ErrInvalidDomainName = errors.New("domain name must be non-empty and alphanumeric")
+
 // GenerateMarkdownContent builds Markdown content for a given domain and its errors.
-func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) string {
+func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) (string, error) {
+	if strings.TrimSpace(domain) == "" || strings.ContainsAny(domain, " ./\\") {
+		return "", ErrInvalidDomainName
+	}
+
 	// Sort error codes alphabetically for consistent ordering
 	var codes []string
 	for code := range errors {
@@ -42,7 +49,7 @@ func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) s
 		))
 	}
 
-	return builder.String()
+	return builder.String(), nil
 }
 
 // EscapeMarkdown escapes special characters for Markdown table rendering.

@@ -19,7 +19,10 @@ func TestGenerateMarkdownContent_SingleError(t *testing.T) {
 		},
 	}
 
-	md := errorz.GenerateMarkdownContent("payment", errors)
+	md, err := errorz.GenerateMarkdownContent("payment", errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if !strings.Contains(md, "# Payment Errors") {
 		t.Errorf("missing title header: %s", md)
@@ -48,7 +51,11 @@ func TestGenerateMarkdownContent_MultipleErrors_Sorted(t *testing.T) {
 			IsRetryable: false,
 		},
 	}
-	md := errorz.GenerateMarkdownContent("payment", errors)
+
+	md, err := errorz.GenerateMarkdownContent("payment", errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	lines := strings.Split(md, "\n")
 	// The first row of data should be PM0001 (sorted)
@@ -76,7 +83,10 @@ func TestGenerateMarkdownContent_WithPipesInMessage(t *testing.T) {
 		},
 	}
 
-	md := errorz.GenerateMarkdownContent("payment", errors)
+	md, err := errorz.GenerateMarkdownContent("payment", errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if !strings.Contains(md, "invalid \\| character") {
 		t.Errorf("expected pipe character to be escaped:\n%s", md)
@@ -84,7 +94,10 @@ func TestGenerateMarkdownContent_WithPipesInMessage(t *testing.T) {
 }
 
 func TestGenerateMarkdownContent_EmptyMap(t *testing.T) {
-	md := errorz.GenerateMarkdownContent("billing", map[string]errorz.ErrorDefinition{})
+	md, err := errorz.GenerateMarkdownContent("billing", map[string]errorz.ErrorDefinition{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if !strings.Contains(md, "# Billing Errors") {
 		t.Errorf("missing header for empty error list:\n%s", md)
@@ -107,7 +120,10 @@ func TestGenerateMarkdownContent_DomainWithUnicodeAndCase(t *testing.T) {
 		},
 	}
 
-	md := errorz.GenerateMarkdownContent("üSêr-Dømãïn", errors)
+	md, err := errorz.GenerateMarkdownContent("üSêr-Dømãïn", errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	expectedHeader := "# Üsêr-Dømãïn Errors"
 	if !strings.Contains(md, expectedHeader) {
@@ -128,7 +144,10 @@ func TestGenerateMarkdownContent_MissingOptionalFields(t *testing.T) {
 		},
 	}
 
-	md := errorz.GenerateMarkdownContent("core", errors)
+	md, err := errorz.GenerateMarkdownContent("core", errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if !strings.Contains(md, "| PM1234 | some error occurred | 500 | internal | high | true |") {
 		t.Errorf("expected table row with missing optional fields to be valid: %s", md)

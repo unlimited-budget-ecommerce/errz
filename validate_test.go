@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/unlimited-budget-ecommerce/errorz"
-	utils_test "github.com/unlimited-budget-ecommerce/errorz/utils"
+	testutils "github.com/unlimited-budget-ecommerce/errorz/utils"
 )
 
 func TestValidateJSON_Valid(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	valid := utils_test.WriteTempFile(t, "valid.json", utils_test.ValidJSON)
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	valid := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
 
 	err := errorz.ValidateJSON(schema, valid)
 	if err != nil {
@@ -19,8 +19,8 @@ func TestValidateJSON_Valid(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidJSONFile(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	invalid := utils_test.WriteTempFile(t, "invalid.json", utils_test.InvalidJSON)
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	invalid := testutils.WriteTempFile(t, "invalid.json", testutils.InvalidJSON)
 
 	err := errorz.ValidateJSON(schema, invalid)
 	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
@@ -36,7 +36,7 @@ func TestValidateJSON_InvalidSchemaPath(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidJSONPath(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
 	err := errorz.ValidateJSON(schema, "/non/existing/file.json")
 	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
 		t.Errorf("expected json path error, got: %v", err)
@@ -44,8 +44,8 @@ func TestValidateJSON_InvalidJSONPath(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidJSONSyntax(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	badJSON := utils_test.WriteTempFile(t, "bad.json", utils_test.MalformedJSON)
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	badJSON := testutils.WriteTempFile(t, "bad.json", testutils.MalformedJSON)
 
 	err := errorz.ValidateJSON(schema, badJSON)
 	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
@@ -54,8 +54,8 @@ func TestValidateJSON_InvalidJSONSyntax(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidSchemaSyntax(t *testing.T) {
-	badSchema := utils_test.WriteTempFile(t, "bad-schema.json", `{`)
-	data := utils_test.WriteTempFile(t, "valid.json", utils_test.ValidJSON)
+	badSchema := testutils.WriteTempFile(t, "bad-schema.json", `{`)
+	data := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
 
 	err := errorz.ValidateJSON(badSchema, data)
 	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
@@ -64,8 +64,8 @@ func TestValidateJSON_InvalidSchemaSyntax(t *testing.T) {
 }
 
 func TestValidateJSON_AdditionalProperty(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	extraJSON := utils_test.WriteTempFile(t, "extra.json", `{
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	extraJSON := testutils.WriteTempFile(t, "extra.json", `{
 	  "PM0001": {
 		"domain": "payment", "code": "PM0001", "msg": "OK",
 		"cause": "none", "http_status": 200, "category": "business",
@@ -80,8 +80,8 @@ func TestValidateJSON_AdditionalProperty(t *testing.T) {
 }
 
 func TestValidateJSON_MissingRequiredField(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	missingJSON := utils_test.WriteTempFile(t, "missing.json", `{
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	missingJSON := testutils.WriteTempFile(t, "missing.json", `{
 	  "PM0001": {
 		"code": "PM0001", "msg": "OK",
 		"cause": "none", "http_status": 200,
@@ -96,8 +96,8 @@ func TestValidateJSON_MissingRequiredField(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidFieldType(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	badTypeJSON := utils_test.WriteTempFile(t, "badtype.json", `{
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	badTypeJSON := testutils.WriteTempFile(t, "badtype.json", `{
 	  "PM0001": {
 		"domain": "payment", "code": "PM0001", "msg": "OK",
 		"cause": "none", "http_status": "not-number",
@@ -112,8 +112,8 @@ func TestValidateJSON_InvalidFieldType(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidFieldEnum(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	enumFailJSON := utils_test.WriteTempFile(t, "enum.json", `{
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	enumFailJSON := testutils.WriteTempFile(t, "enum.json", `{
 	  "PM0001": {
 		"domain": "payment", "code": "PM0001", "msg": "OK",
 		"cause": "none", "http_status": 200,
@@ -128,8 +128,8 @@ func TestValidateJSON_InvalidFieldEnum(t *testing.T) {
 }
 
 func TestValidateJSON_InvalidPattern(t *testing.T) {
-	schema := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	badCodeJSON := utils_test.WriteTempFile(t, "pattern.json", `{
+	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	badCodeJSON := testutils.WriteTempFile(t, "pattern.json", `{
 	  "PMXXXX": {
 		"domain": "payment", "code": "PMXXXX", "msg": "OK",
 		"cause": "none", "http_status": 200,

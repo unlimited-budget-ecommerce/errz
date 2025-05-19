@@ -1,5 +1,5 @@
 // FOR UNIT TEST
-package utils_test
+package testutils
 
 const SchemaJSON = `{
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -46,6 +46,57 @@ const ValidJSON = `{
     "solution": "ask user to top-up balance",
     "is_retryable": false,
     "tags": ["payment", "user"]
+  }
+}`
+
+const ManyValidJSON = `{
+   "PM0001": {
+    "domain": "payment",
+    "code": "PM0001",
+    "msg": "payment failed",
+    "cause": "insufficient balance",
+    "http_status": 400,
+    "category": "business",
+    "severity": "medium",
+    "solution": "ask user to top-up balance",
+    "is_retryable": false,
+    "tags": ["payment", "user"]
+  },
+  "PM0002": {
+    "domain": "payment",
+    "code": "PM0002",
+    "msg": "timeout",
+    "cause": "payment provider slow",
+    "http_status": 504,
+    "category": "timeout",
+    "severity": "high",
+    "solution": "retry request",
+    "is_retryable": true,
+    "tags": ["payment", "timeout"]
+  },
+  "AU0001": {
+    "domain": "auth",
+    "code": "AU0001",
+    "msg": "invalid token",
+    "cause": "token expired",
+    "http_status": 401,
+    "category": "internal",
+    "severity": "high",
+    "solution": "refresh token",
+    "is_retryable": true,
+    "tags": ["auth", "security"]
+  },
+  "OR0001": {
+    "domain": "order",
+    "code": "OR0001",
+    "msg": "order not found",
+    "cause": "missing ID",
+    "http_status": 404,
+    "category": "validation",
+    "severity": "low",
+    "solution": "check order ID",
+    "is_retryable": false,
+    "tags": ["order", "lookup"]
   }
 }`
 

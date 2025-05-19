@@ -7,27 +7,20 @@ import (
 	"testing"
 
 	"github.com/unlimited-budget-ecommerce/errorz"
+	testutils "github.com/unlimited-budget-ecommerce/errorz/utils"
 )
 
-// Helpers to patch functions inside errorz package (using closures)
-func resetPatches() {
-	errorz.MkdirAll = os.MkdirAll
-	errorz.WriteToFileFunc = errorz.WriteToFile
-	errorz.GenerateGoContentFunc = errorz.GenerateGoContent
-	errorz.GenerateMarkdownContentFunc = errorz.GenerateMarkdownContent
-}
-
 func TestWriteGoFile(t *testing.T) {
-	defer resetPatches()
+	defer testutils.ResetPatches()
 
-	tempDir := t.TempDir() // use isolated temp directory
+	tempDir := t.TempDir()
 
 	// Case: MkdirAll error
 	errorz.MkdirAll = func(path string, perm os.FileMode) error {
 		return errors.New("mkdir error")
 	}
 	err := errorz.WriteGoFile(tempDir, "pkg", nil)
-	if err == nil || err.Error() != "failed to create output dir: mkdir error" {
+	if err == nil || err.Error() != "failed to create package directory: mkdir error" {
 		t.Fatalf("expected mkdir error, got %v", err)
 	}
 
@@ -63,8 +56,33 @@ func TestWriteGoFile(t *testing.T) {
 	}
 }
 
+func TestWriteGoFile_CreatesSubdirectoryAndFile(t *testing.T) {
+	defer testutils.ResetPatches()
+
+	tempDir := t.TempDir()
+	var writtenPath string
+
+	errorz.GenerateGoContentFunc = func(pkg string, errs map[string]errorz.ErrorDefinition) (string, error) {
+		return "package content", nil
+	}
+	errorz.WriteToFileFunc = func(path, content string) error {
+		writtenPath = path
+		return nil
+	}
+
+	err := errorz.WriteGoFile(tempDir, "mypkg", nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	expectedPath := filepath.Join(tempDir, "mypkg", "mypkg.go")
+	if writtenPath != expectedPath {
+		t.Errorf("expected file to be written to %s, got %s", expectedPath, writtenPath)
+	}
+}
+
 func TestWriteMarkdown(t *testing.T) {
-	defer resetPatches()
+	defer testutils.ResetPatches()
 
 	tempDir := t.TempDir()
 
@@ -79,8 +97,8 @@ func TestWriteMarkdown(t *testing.T) {
 
 	// Case: WriteToFile returns an error
 	errorz.MkdirAll = os.MkdirAll
-	errorz.GenerateMarkdownContentFunc = func(domain string, errs map[string]errorz.ErrorDefinition) string {
-		return "markdown content"
+	errorz.GenerateMarkdownContentFunc = func(domain string, errs map[string]errorz.ErrorDefinition) (string, error) {
+		return "markdown content", nil
 	}
 	errorz.WriteToFileFunc = func(path, content string) error {
 		return errors.New("write file error")
@@ -97,6 +115,31 @@ func TestWriteMarkdown(t *testing.T) {
 	err = errorz.WriteMarkdown(tempDir, "domain", nil)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestWriteMarkdown_CreatesSubdirectoryAndFile(t *testing.T) {
+	defer testutils.ResetPatches()
+
+	tempDir := t.TempDir()
+	var writtenPath string
+
+	errorz.GenerateMarkdownContentFunc = func(domain string, errs map[string]errorz.ErrorDefinition) (string, error) {
+		return "doc content", nil
+	}
+	errorz.WriteToFileFunc = func(path, content string) error {
+		writtenPath = path
+		return nil
+	}
+
+	err := errorz.WriteMarkdown(tempDir, "OrderDomain", nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	expectedPath := filepath.Join(tempDir, "orderdomain", "orderdomain.md")
+	if writtenPath != expectedPath {
+		t.Errorf("expected file to be written to %s, got %s", expectedPath, writtenPath)
 	}
 }
 

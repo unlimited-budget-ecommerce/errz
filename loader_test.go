@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/unlimited-budget-ecommerce/errorz"
-	utils_test "github.com/unlimited-budget-ecommerce/errorz/utils"
+	testutils "github.com/unlimited-budget-ecommerce/errorz/utils"
 )
 
 func TestLoadAndValidateJSON_Success(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	jsonPath := utils_test.WriteTempFile(t, "valid.json", utils_test.ValidJSON)
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	jsonPath := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
 
 	result, err := errorz.LoadAndValidateJSON(schemaPath, jsonPath)
 	if err != nil {
@@ -22,8 +22,8 @@ func TestLoadAndValidateJSON_Success(t *testing.T) {
 }
 
 func TestLoadAndValidateJSON_InvalidSchema(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	jsonPath := utils_test.WriteTempFile(t, "invalid.json", utils_test.InvalidJSON)
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	jsonPath := testutils.WriteTempFile(t, "invalid.json", testutils.InvalidJSON)
 
 	_, err := errorz.LoadAndValidateJSON(schemaPath, jsonPath)
 	if err == nil || !strings.Contains(err.Error(), "validation failed") {
@@ -32,8 +32,8 @@ func TestLoadAndValidateJSON_InvalidSchema(t *testing.T) {
 }
 
 func TestLoadAndValidateJSON_MalformedJSON(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	jsonPath := utils_test.WriteTempFile(t, "malformed.json", utils_test.MalformedJSON)
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	jsonPath := testutils.WriteTempFile(t, "malformed.json", testutils.MalformedJSON)
 
 	_, err := errorz.LoadAndValidateJSON(schemaPath, jsonPath)
 	if err == nil || !strings.Contains(err.Error(), "validation failed") {
@@ -42,7 +42,7 @@ func TestLoadAndValidateJSON_MalformedJSON(t *testing.T) {
 }
 
 func TestLoadAndValidateJSON_FileNotFound(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
 
 	_, err := errorz.LoadAndValidateJSON(schemaPath, "not_exists.json")
 	if err == nil || !strings.Contains(err.Error(), "validation failed") {
@@ -51,9 +51,9 @@ func TestLoadAndValidateJSON_FileNotFound(t *testing.T) {
 }
 
 func TestLoadErrors_SuccessMultipleFiles(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	jsonPath1 := utils_test.WriteTempFile(t, "file1.json", utils_test.ValidJSON)
-	jsonPath2 := utils_test.WriteTempFile(t, "file2.json", strings.Replace(utils_test.ValidJSON, "PM0001", "PM0002", 1))
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	jsonPath1 := testutils.WriteTempFile(t, "file1.json", testutils.ValidJSON)
+	jsonPath2 := testutils.WriteTempFile(t, "file2.json", strings.Replace(testutils.ValidJSON, "PM0001", "PM0002", 1))
 
 	errors, err := errorz.LoadErrors(schemaPath, []string{jsonPath1, jsonPath2})
 	if err != nil {
@@ -65,9 +65,9 @@ func TestLoadErrors_SuccessMultipleFiles(t *testing.T) {
 }
 
 func TestLoadErrors_DuplicateCode(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	jsonPath1 := utils_test.WriteTempFile(t, "file1.json", utils_test.ValidJSON)
-	jsonPath2 := utils_test.WriteTempFile(t, "file2.json", utils_test.ValidJSON) // same code: PM0001
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	jsonPath1 := testutils.WriteTempFile(t, "file1.json", testutils.ValidJSON)
+	jsonPath2 := testutils.WriteTempFile(t, "file2.json", testutils.ValidJSON) // same code: PM0001
 
 	_, err := errorz.LoadErrors(schemaPath, []string{jsonPath1, jsonPath2})
 	if err == nil || !strings.Contains(err.Error(), "duplicate error code PM0001") {
@@ -76,8 +76,8 @@ func TestLoadErrors_DuplicateCode(t *testing.T) {
 }
 
 func TestLoadErrors_WithInvalidFile(t *testing.T) {
-	schemaPath := utils_test.WriteTempFile(t, "schema.json", utils_test.SchemaJSON)
-	invalidPath := utils_test.WriteTempFile(t, "bad.json", utils_test.InvalidJSON)
+	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
+	invalidPath := testutils.WriteTempFile(t, "bad.json", testutils.InvalidJSON)
 
 	_, err := errorz.LoadErrors(schemaPath, []string{invalidPath})
 	if err == nil || !strings.Contains(err.Error(), "validation failed") {

@@ -1,4 +1,4 @@
 cmd/
-docs/
-gos/
+errorz_go/
+errorz_doc/
 example/
