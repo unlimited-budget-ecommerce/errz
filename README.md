@@ -66,7 +66,7 @@ Example error definition JSON:
 
 ### Usage Example
 
-```bash
+```go
 package main
 
 import (
@@ -116,7 +116,7 @@ Supports fields such as:
 
 ## Example Error Struct
 
-```bash
+```go
 type Error struct {
     Code       string
     Msg        string
