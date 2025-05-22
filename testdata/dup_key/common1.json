@@ -1,0 +1,14 @@
+{
+  "CM0000": {
+    "domain": "common",
+    "code": "CM0000",
+    "msg": "success",
+    "cause": "operation completed successfully",
+    "http_status": 200,
+    "category": "business",
+    "severity": "low",
+    "is_retryable": false,
+    "solution": "no action needed",
+    "tags": ["success"]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "type": "banana",
+  "properties": {
+    "domain": { "type": "string" }
+  }
+}

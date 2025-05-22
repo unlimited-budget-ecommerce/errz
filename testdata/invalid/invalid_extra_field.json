@@ -1,0 +1,13 @@
+{
+  "CM0001": {
+    "domain": "common",
+    "code": "CM0001",
+    "msg": "test message",
+    "cause": "test cause",
+    "http_status": 200,
+    "category": "business",
+    "severity": "low",
+    "is_retryable": false,
+    "extra_field": "not allowed"
+  }
+}

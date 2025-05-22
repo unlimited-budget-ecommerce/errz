@@ -1,133 +1,86 @@
-package errorz_test
+//go:generate go run ./cmd/gen_errors/gen.go
+package errorz
 
 import (
-	"errors"
 	"os"
+	"path/filepath"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/unlimited-budget-ecommerce/errorz"
-	testutils "github.com/unlimited-budget-ecommerce/errorz/utils"
 )
 
-var ErrGoGenerationFails = errors.New("go content fail")
-var ErrMdGenerationFails = errors.New("md fail")
+func TestGenerate_Success(t *testing.T) {
+	tmpDir := t.TempDir()
+	outputGoFile := filepath.Join(tmpDir, "errors_gen.go")
 
-// mock versions of dependencies
-func mockGenerateGoContent(packageName string, errors map[string]errorz.ErrorDefinition) (string, error) {
-	return "// mock Go content", nil
-}
-
-func mockGenerateMarkdownContent(domain string, errors map[string]errorz.ErrorDefinition) (string, error) {
-	return "# mock Markdown content", nil
-}
-
-func mockWriteToFile(path, content string) error {
-	return nil
-}
-
-func mockMkdirAll(path string, perm os.FileMode) error {
-	return nil
-}
-
-func setupMocks() {
-	errorz.GenerateGoContentFunc = mockGenerateGoContent
-	errorz.GenerateMarkdownContentFunc = mockGenerateMarkdownContent
-	errorz.WriteToFileFunc = mockWriteToFile
-	errorz.MkdirAll = mockMkdirAll
-}
-
-func TestGenerateErrorsFromJSON_ValidSingle(t *testing.T) {
-	setupMocks()
-	path := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.NoError(t, err)
-}
-
-func TestGenerateErrorsFromJSON_ValidMany(t *testing.T) {
-	setupMocks()
-	path := testutils.WriteTempFile(t, "many.json", testutils.ManyValidJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.NoError(t, err)
-}
-
-func TestGenerateErrorsFromJSON_InvalidJSONSchema(t *testing.T) {
-	setupMocks()
-	path := testutils.WriteTempFile(t, "invalid.json", testutils.InvalidJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "JSON validation failed")
-}
-
-func TestGenerateErrorsFromJSON_MalformedJSON(t *testing.T) {
-	setupMocks()
-	path := testutils.WriteTempFile(t, "malformed.json", testutils.MalformedJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid character")
-}
-
-func TestGenerateErrorsFromJSON_GoGenerationFails(t *testing.T) {
-	// override GenerateGoContent to return error
-	errorz.GenerateGoContentFunc = func(packageName string, errors map[string]errorz.ErrorDefinition) (string, error) {
-		return "", ErrGoGenerationFails
-	}
-	errorz.GenerateMarkdownContentFunc = mockGenerateMarkdownContent
-	errorz.WriteToFileFunc = mockWriteToFile
-	errorz.MkdirAll = mockMkdirAll
-
-	path := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "go content fail")
-}
-
-func TestGenerateErrorsFromJSON_MarkdownGenerationFails(t *testing.T) {
-	errorz.GenerateGoContentFunc = mockGenerateGoContent
-	errorz.GenerateMarkdownContentFunc = func(domain string, errors map[string]errorz.ErrorDefinition) (string, error) {
-		return "", ErrMdGenerationFails
-	}
-	errorz.WriteToFileFunc = mockWriteToFile
-	errorz.MkdirAll = mockMkdirAll
-
-	path := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "md fail")
-}
-
-func TestGenerateErrorsFromJSON_WriteToFileFails(t *testing.T) {
-	errorz.GenerateGoContentFunc = mockGenerateGoContent
-	errorz.GenerateMarkdownContentFunc = mockGenerateMarkdownContent
-	errorz.WriteToFileFunc = func(path, content string) error {
-		return errors.New("write fail")
-	}
-	errorz.MkdirAll = mockMkdirAll
-
-	path := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
-
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "write fail")
-}
-
-func TestGenerateErrorsFromJSON_MkdirFails(t *testing.T) {
-	errorz.GenerateGoContentFunc = mockGenerateGoContent
-	errorz.GenerateMarkdownContentFunc = mockGenerateMarkdownContent
-	errorz.WriteToFileFunc = mockWriteToFile
-	errorz.MkdirAll = func(path string, perm os.FileMode) error {
-		return errors.New("mkdir fail")
+	errors := map[string]ErrorDefinition{
+		"UR0001": {
+			Code:        "USER_NOT_FOUND",
+			Msg:         "User not found",
+			Cause:       "User ID missing",
+			HTTPStatus:  404,
+			Category:    "user",
+			Severity:    "low",
+			IsRetryable: false,
+			Solution:    "Provide correct user ID",
+			Domain:      "user",
+			Tags:        []string{"auth"},
+		},
+		"OR0001": {
+			Code:        "ORDER_FAILED",
+			Msg:         "Order could not be completed",
+			Cause:       "Payment issue",
+			HTTPStatus:  500,
+			Category:    "order",
+			Severity:    "critical",
+			IsRetryable: true,
+			Solution:    "Check payment system",
+			Domain:      "order",
+			Tags:        []string{"payment", "order"},
+		},
 	}
 
-	path := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
+	err := Generate(outputGoFile, tmpDir, errors)
+	if err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
 
-	err := errorz.GenerateErrorsFromJSON(path)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "mkdir fail")
+	// Check Go file created
+	if _, err := os.Stat(outputGoFile); err != nil {
+		t.Errorf("Go file not created: %v", err)
+	}
+
+	// Check Markdown files created
+	expectedFiles := []string{
+		filepath.Join(tmpDir, "user", "user.md"),
+		filepath.Join(tmpDir, "order", "order.md"),
+	}
+	for _, path := range expectedFiles {
+		if _, err := os.Stat(path); err != nil {
+			t.Errorf("Markdown file missing: %s", path)
+		}
+	}
+}
+
+func TestGenerate_EmptyOutputPath(t *testing.T) {
+	err := Generate("", t.TempDir(), map[string]ErrorDefinition{})
+	if err == nil || err.Error() != "failed to write go content: output file path cannot be empty" {
+		t.Errorf("Expected output file path error, got: %v", err)
+	}
+}
+
+func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
+	err := Generate(t.TempDir()+"/go.go", "", map[string]ErrorDefinition{
+		"X": {Code: "X", Domain: "abc"},
+	})
+	if err == nil || err.Error() == "" {
+		t.Errorf("Expected markdown directory error, got: %v", err)
+	}
+}
+
+func TestGenerate_EmptyDomainInError(t *testing.T) {
+	err := Generate(t.TempDir()+"/go.go", t.TempDir(), map[string]ErrorDefinition{
+		"X": {Code: "X", Domain: ""},
+	})
+	if err == nil || err.Error() == "" {
+		t.Errorf("Expected domain error, got: %v", err)
+	}
 }

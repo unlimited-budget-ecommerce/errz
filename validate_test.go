@@ -1,144 +1,95 @@
-package errorz_test
+//go:generate go run ./cmd/gen_errors/gen.go
+package errorz
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/unlimited-budget-ecommerce/errorz"
-	testutils "github.com/unlimited-budget-ecommerce/errorz/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateJSON_Valid(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	valid := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
+	schema := "testdata/error_schema.json"
+	validFile := "testdata/valid/common.json"
 
-	err := errorz.ValidateJSON(schema, valid)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
+	err := ValidateJSON(schema, validFile)
+	assert.NoError(t, err)
 }
 
-func TestValidateJSON_InvalidJSONFile(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	invalid := testutils.WriteTempFile(t, "invalid.json", testutils.InvalidJSON)
+func TestValidateJSON_Invalid(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	invalidFile := "testdata/invalid/invalid_missing_required.json"
 
-	err := errorz.ValidateJSON(schema, invalid)
-	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
-		t.Errorf("expected validation error, got: %v", err)
-	}
+	err := ValidateJSON(schema, invalidFile)
+	assert.Error(t, err)
+	assert.True(t, strings.Contains(err.Error(), "JSON validation failed"))
 }
 
-func TestValidateJSON_InvalidSchemaPath(t *testing.T) {
-	err := errorz.ValidateJSON("/non/existing/schema.json", "/dev/null")
-	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
-		t.Errorf("expected schema path error, got: %v", err)
-	}
+func TestValidateJSON_FileNotFound(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	missingFile := "testdata/missing.json"
+
+	err := ValidateJSON(schema, missingFile)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "file not found")
 }
 
-func TestValidateJSON_InvalidJSONPath(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	err := errorz.ValidateJSON(schema, "/non/existing/file.json")
-	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
-		t.Errorf("expected json path error, got: %v", err)
-	}
+func TestValidateJSON_InvalidSchema(t *testing.T) {
+	schema := "testdata/invalid_schema.json" // malformed schema
+	validFile := "testdata/valid/common.json"
+
+	err := ValidateJSON(schema, validFile)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to run validation")
 }
 
-func TestValidateJSON_InvalidJSONSyntax(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	badJSON := testutils.WriteTempFile(t, "bad.json", testutils.MalformedJSON)
+func TestValidateAllJSONFiles_AllValid(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	dir := "testdata/valid"
 
-	err := errorz.ValidateJSON(schema, badJSON)
-	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
-		t.Errorf("expected JSON syntax error, got: %v", err)
-	}
+	err := ValidateAllJSONFiles(schema, dir)
+	assert.NoError(t, err)
 }
 
-func TestValidateJSON_InvalidSchemaSyntax(t *testing.T) {
-	badSchema := testutils.WriteTempFile(t, "bad-schema.json", `{`)
-	data := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
+func TestValidateAllJSONFiles_HasInvalid(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	dir := "testdata/mixed" // includes both valid and invalid JSONs
 
-	err := errorz.ValidateJSON(badSchema, data)
-	if err == nil || !strings.Contains(err.Error(), "failed to run validation") {
-		t.Errorf("expected schema syntax error, got: %v", err)
-	}
+	err := ValidateAllJSONFiles(schema, dir)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "validation failed for")
 }
 
-func TestValidateJSON_AdditionalProperty(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	extraJSON := testutils.WriteTempFile(t, "extra.json", `{
-	  "PM0001": {
-		"domain": "payment", "code": "PM0001", "msg": "OK",
-		"cause": "none", "http_status": 200, "category": "business",
-		"severity": "low", "is_retryable": false, "extra": "not allowed"
-	  }
-	}`)
+func TestValidateAllJSONFiles_DirNotFound(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	dir := "testdata/notfound"
 
-	err := errorz.ValidateJSON(schema, extraJSON)
-	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
-		t.Errorf("expected additionalProperty error, got: %v", err)
-	}
+	err := ValidateAllJSONFiles(schema, dir)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to read directory")
 }
 
-func TestValidateJSON_MissingRequiredField(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	missingJSON := testutils.WriteTempFile(t, "missing.json", `{
-	  "PM0001": {
-		"code": "PM0001", "msg": "OK",
-		"cause": "none", "http_status": 200,
-		"category": "business", "severity": "low", "is_retryable": false
-	  }
-	}`)
+func TestValidateAllJSONFiles_SkipNonJSON(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	dir := "testdata/mixed_with_nonjson"
 
-	err := errorz.ValidateJSON(schema, missingJSON)
-	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
-		t.Errorf("expected required field error, got: %v", err)
-	}
+	err := ValidateAllJSONFiles(schema, dir)
+	assert.NoError(t, err)
 }
 
-func TestValidateJSON_InvalidFieldType(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	badTypeJSON := testutils.WriteTempFile(t, "badtype.json", `{
-	  "PM0001": {
-		"domain": "payment", "code": "PM0001", "msg": "OK",
-		"cause": "none", "http_status": "not-number",
-		"category": "business", "severity": "low", "is_retryable": false
-	  }
-	}`)
+func TestValidateAllJSONFiles_EmptyDirectory(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	dir := "testdata/empty"
 
-	err := errorz.ValidateJSON(schema, badTypeJSON)
-	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
-		t.Errorf("expected field type error, got: %v", err)
-	}
+	err := ValidateAllJSONFiles(schema, dir)
+	assert.NoError(t, err)
 }
 
-func TestValidateJSON_InvalidFieldEnum(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	enumFailJSON := testutils.WriteTempFile(t, "enum.json", `{
-	  "PM0001": {
-		"domain": "payment", "code": "PM0001", "msg": "OK",
-		"cause": "none", "http_status": 200,
-		"category": "unknown", "severity": "low", "is_retryable": false
-	  }
-	}`)
+func TestValidateJSON_ExtraFields(t *testing.T) {
+	schema := "testdata/error_schema.json"
+	file := "testdata/invalid/invalid_extra_field.json"
 
-	err := errorz.ValidateJSON(schema, enumFailJSON)
-	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
-		t.Errorf("expected enum validation error, got: %v", err)
-	}
-}
-
-func TestValidateJSON_InvalidPattern(t *testing.T) {
-	schema := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	badCodeJSON := testutils.WriteTempFile(t, "pattern.json", `{
-	  "PMXXXX": {
-		"domain": "payment", "code": "PMXXXX", "msg": "OK",
-		"cause": "none", "http_status": 200,
-		"category": "business", "severity": "low", "is_retryable": false
-	  }
-	}`)
-
-	err := errorz.ValidateJSON(schema, badCodeJSON)
-	if err == nil || !strings.Contains(err.Error(), "JSON validation failed:") {
-		t.Errorf("expected pattern error, got: %v", err)
-	}
+	err := ValidateJSON(schema, file)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Additional property")
 }

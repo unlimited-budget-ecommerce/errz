@@ -1,85 +1,66 @@
+//go:generate go run ./cmd/gen_errors/gen.go
 package errorz
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
+
+	"golang.org/x/sync/errgroup"
 )
 
-// LoadAndValidateJSON loads a JSON file, validates it against the provided schema,
-// and unmarshals it into a map of ErrorDefinition keyed by error code.
-func LoadAndValidateJSON(schemaPath, jsonPath string) (map[string]ErrorDefinition, error) {
-	// Validate JSON file against schema
-	if err := ValidateJSON(schemaPath, jsonPath); err != nil {
-		return nil, fmt.Errorf("validation failed for %s: %w", jsonPath, err)
-	}
+// LoadErrorDefinitions loads all JSON files from a directory and returns combined error definitions map.
+func LoadErrorDefinitions(dir string) (map[string]ErrorDefinition, error) {
+	result := make(map[string]ErrorDefinition)
+	var mu sync.Mutex
 
-	// Read JSON file content
-	data, err := os.ReadFile(jsonPath)
+	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read %s: %w", jsonPath, err)
+		return nil, err
 	}
 
-	// Unmarshal JSON content into map[string]ErrorDefinition
-	var errorsMap map[string]ErrorDefinition
-	if err := json.Unmarshal(data, &errorsMap); err != nil {
-		return nil, fmt.Errorf("failed to parse %s: %w", jsonPath, err)
-	}
+	var g errgroup.Group
+	for _, entry := range entries {
+		entry := entry
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+			continue
+		}
 
-	return errorsMap, nil
-}
+		fullPath := filepath.Join(dir, entry.Name())
 
-// LoadErrors concurrently loads multiple JSON error definition files,
-// validates them, and combines the results into a single map.
-// It returns an error if validation fails or if duplicate error codes are detected.
-func LoadErrors(schemaPath string, jsonPaths []string) (map[string]ErrorDefinition, error) {
-	var (
-		wg       sync.WaitGroup // WaitGroup to wait for all goroutines to finish
-		errOnce  sync.Once      // Ensures only the first error is recorded
-		firstErr error          // Stores the first error encountered
-		mu       sync.Mutex     // Mutex to protect concurrent map writes
-	)
-
-	allErrors := make(map[string]ErrorDefinition) // Combined error definitions
-
-	wg.Add(len(jsonPaths))
-
-	for _, path := range jsonPaths {
-		go func(p string) {
-			defer wg.Done()
-
-			// Load and validate the JSON file
-			errDefs, err := LoadAndValidateJSON(schemaPath, p)
+		g.Go(func() error {
+			content, err := os.ReadFile(fullPath)
 			if err != nil {
-				// Capture the first error encountered and return early from this goroutine
-				errOnce.Do(func() { firstErr = err })
-				return
+				return fmt.Errorf("read error at %s: %w", fullPath, err)
+			}
+
+			var defs map[string]ErrorDefinition
+			if err := json.Unmarshal(content, &defs); err != nil {
+				return fmt.Errorf("unmarshal error at %s: %w", fullPath, err)
+			}
+
+			if len(defs) == 0 {
+				return fmt.Errorf("no errors found in %s", fullPath)
 			}
 
 			mu.Lock()
 			defer mu.Unlock()
-
-			// Merge loaded error definitions into the combined map
-			for code, errDef := range errDefs {
-				if _, exists := allErrors[code]; exists {
-					// Detect duplicate error codes and record error
-					errOnce.Do(func() {
-						firstErr = fmt.Errorf("duplicate error code %s found in %s", code, p)
-					})
-					return
+			for k, v := range defs {
+				if _, exists := result[k]; exists {
+					return fmt.Errorf("duplicate error code detected: %s in %s", k, fullPath)
 				}
-				allErrors[code] = errDef
+				result[k] = v
 			}
-		}(path)
+
+			return nil
+		})
 	}
 
-	wg.Wait()
-
-	// Return any error that occured during loading or merging
-	if firstErr != nil {
-		return nil, firstErr
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
-	return allErrors, nil
+	return result, nil
 }

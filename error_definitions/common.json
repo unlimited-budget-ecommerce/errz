@@ -1,0 +1,38 @@
+{
+  "CM0000": {
+    "domain": "common",
+    "code": "CM0000",
+    "msg": "success",
+    "cause": "operation completed successfully",
+    "http_status": 200,
+    "category": "business",
+    "severity": "low",
+    "is_retryable": false,
+    "solution": "no action needed",
+    "tags": ["success"]
+  },
+  "CM0400": {
+    "domain": "common",
+    "code": "CM0400",
+    "msg": "bad request",
+    "cause": "invalid input or malformed request",
+    "http_status": 400,
+    "category": "validation",
+    "severity": "medium",
+    "is_retryable": false,
+    "solution": "check input format and required fields",
+    "tags": ["client", "input"]
+  },
+  "CM0500": {
+    "domain": "common",
+    "code": "CM0500",
+    "msg": "internal server error",
+    "cause": "unexpected server-side error",
+    "http_status": 500,
+    "category": "internal",
+    "severity": "high",
+    "is_retryable": true,
+    "solution": "check logs and trace ID",
+    "tags": ["server", "bug"]
+  }
+}

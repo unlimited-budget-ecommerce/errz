@@ -5,12 +5,9 @@
 ## Features
 
 - JSON Schema validation
-- Concurrent loading of multiple JSON error files
 - Code generation for:
-  - Go: structured error variables and slice
+  - Go: structured error variables and `ErrorsMap` for fast lookup
   - Markdown: human-readable documentation grouped by domain
-- Duplicate error code detection
-- Caching of Markdown headers for performance
 
 ## Installation
 
@@ -23,18 +20,21 @@ go get github.com/unlimited-budget-ecommerce/errorz
 This project uses JSON files to define error definitions, validated against a JSON Schema to ensure correct format.
 
 - Schema JSON file: `/schema/error_schema.json`
-- The JSON error definitions must be an object with error codes as keys (error codes must follow the pattern: 2 uppercase letters followed by 4 digits, e.g. `AB1234`).
+- The JSON error definitions must be an object with error codes as keys.(Error codes must follow the pattern: 2 uppercase letters followed by 4 digits, e.g. `PM0001`.)
 - Each error definition must include the following fields:
-  - `domain` (string) — error domain/category (e.g., "payment", "user-auth")
-  - `code` (string) — error code matching the defined pattern
-  - `msg` (string) — error message to display
-  - `cause` (string) — cause of the error
-  - `http_status` (integer) — related HTTP status code (100-599)
-  - `category` (string) — error category (`validation`, `timeout`, `business`, `external`, `internal`)
-  - `severity` (string) — severity level (`low`, `medium`, `high`, `critical`)
-  - `solution` (string, optional) — suggested solution to fix the error
-  - `is_retryable` (boolean) — indicates if the error is retryable
-  - `tags` (array of strings, optional) — tags for additional grouping
+
+| Field          |   Type    |   Required    | Description                         |
+| :------------- | :-------: | :-----------: | :---------------------------------- |
+| `domain`       |  string   |      ✅       | Logical domain (e.g. `"auth"`)      |
+| `code`         |  string   |      ✅       | Unique code, like `"PM0001"`        |
+| `msg`          |  string   |      ✅       | User-friendly message               |
+| `cause`        |  string   |      ✅       | Root cause of the error             |
+| `http_status`  |  integer  |      ✅       | HTTP status code (100–599)          |
+| `category`     |  string   |      ✅       | `validation`, `business`, etc.      |
+| `severity`     |  string   |      ✅       | `low`, `medium`, `high`, `critical` |
+| `solution`     |  string   | ❌ (optional) | Suggested fix (if available)        |
+| `is_retryable` |  boolean  |      ✅       | Whether it's safe to retry          |
+| `tags`         | \[]string | ❌ (optional) | Optional grouping keywords          |
 
 Example error definition JSON:
 
@@ -43,87 +43,117 @@ Example error definition JSON:
   "PM0001": {
     "domain": "payment",
     "code": "PM0001",
-    "msg": "payment failed",
-    "cause": "insufficient balance",
-    "http_status": 400,
+    "msg": "insufficient balance",
+    "cause": "user has not enough balance",
+    "http_status": 402,
     "category": "business",
     "severity": "medium",
-    "solution": "ask user to top-up balance",
     "is_retryable": false,
-    "tags": ["payment", "user"]
+    "solution": "ask user to top-up or choose another method",
+    "tags": ["payment", "balance"]
   }
 }
 ```
 
-> **Note:**  
-> You should create your own JSON file containing error definitions, for example at `errors/example.json`, which will be used as input to generate Go code and Markdown documentation.
+## Generator
 
-## Usage
+### Generator Pattern
 
-- Validate and load error definitions
-- Generate Go source file
-- Generate Markdown documentation
-
-### Usage Example
+Use `Generator()` for unified generation:
 
 ```go
 package main
 
 import (
-    "encoding/json"
-    "fmt"
-    "os"
+  "fmt"
+  "log"
+  "path/filepath"
 
-    "github.com/unlimited-budget-ecommerce/errorz"
+  "github.com/unlimited-budget-ecommerce/errorz"
+)
+
+const (
+  relativeSchemaPath      = "schema/error_schema.json"
+  relativeDefinitionsPath = "error_definitions"
+  outputFile              = "errors_gen.go"
+  outputDir               = "docs"
 )
 
 func main() {
-    // jsonPath should point to your own error definitions JSON file.
-    // Replace this with the actual path to your input file.
-    jsonPath := "errors/example.json"
+  rootDir := errorz.ProjectRoot()
 
-    // Generate Go code and Markdown
-    err := errorz.GenerateErrorsFromJSON(jsonPath)
-    if err != nil {
-      fmt.Printf("Could not generate error form JSON: %v", err)
-      os.Exit(1)
-    }
+  gen := errorz.Generator{
+    SchemaPath:     filepath.Join(rootDir, relativeSchemaPath),
+    DefinitionsDir: filepath.Join(rootDir, relativeDefinitionsPath),
+    OutputPath:     filepath.Join(rootDir, outputFile),
+    OutputDocDir:   filepath.Join(rootDir, outputDir),
+  }
 
-    fmt.Println("Generation completed successfully.")
+  if err := gen.Run(); err != nil {
+    log.Fatalf("generate failed: %v", err)
+  }
+
+  fmt.Println("Generated", outputFile)
 }
 ```
 
-## Output
+Or step-by-step (if preferred):
 
-- Go generation contains:
-  - Error struct
-  - Error variables like ER0001, ER0002, ...
-  - Errors slice
-- Markdown generation contains:
-  - Markdown table of all user domain errors
+```go
+errors := errorz.LoadErrorDefinitions("error_definitions")
+errorz.ValidateAllJSONFiles("schema/error_schema.json", "error_definitions")
+errorz.Generator("errors_gen.go", "docs", errors)
+```
 
-## JSON Schema
+## Usage and Output
 
-Located at: `/schema/error_schema.json`
+### Error code catalog
 
-Supports fields such as:
+You can get a quick overview of all error codes and their meaning in `errorz_code_catalog.md`
 
-- code, msg, cause, domain, http_status
-- category: validation, timeout, business, external, internal
-- severity: low, medium, high, critical
-- is_retryable: boolean
-- Optional: solution, tags
+### Go generation contains (Already Generated – Ready to Use)
+
+- Error struct
+- Global variables (e.g., PM0001)
+- ErrorsMap map for fast string-based lookup:
+
+```go
+err := errorz.ErrorsMap["PM0001"] // preferred for performance
+```
+
+> **Note:**
+>
+> ✅ No need to generate anything yourself. This package already includes the generated Go code.  
+> 👉 Just import and use the variables or ErrorsMap directly!
+>
+> - ErrorsMap["CODE"] is recommended for dynamic lookups.
+> - Use errorz.PM0001 for static compile-time usage.
+
+### Markdown generation contains
+
+- Generated in `/docs` (or configured output directory), grouped by domain and including all metadata.
 
 ## Example Error Struct
 
 ```go
 type Error struct {
-    Code       string
-    Msg        string
-    HTTPStatus int
+  Code        string
+  Msg         string
+  Cause       string
+  HTTPStatus  int
+  Category    string
+  Severity    string
+  IsRetryable bool
+  Solution    string
+  Tags        []string
 }
 ```
 
 ## Validations
 
 - JSON is validated using **[xeipuuv/gojsonschema](https://github.com/xeipuuv/gojsonschema.git)**
+
+## Tips
+
+- Use `ErrorsMap["CODE"]` when lookup is based on string (e.g., from logs or API).
+- Keep your domain files (e.g., auth.json, payment.json) separate for clarity.

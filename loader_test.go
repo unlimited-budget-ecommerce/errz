@@ -1,86 +1,62 @@
-package errorz_test
+//go:generate go run ./cmd/gen_errors/gen.go
+package errorz
 
 import (
-	"strings"
+	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/unlimited-budget-ecommerce/errorz"
-	testutils "github.com/unlimited-budget-ecommerce/errorz/utils"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadAndValidateJSON_Success(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	jsonPath := testutils.WriteTempFile(t, "valid.json", testutils.ValidJSON)
-
-	result, err := errorz.LoadAndValidateJSON(schemaPath, jsonPath)
-	if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
-	if _, ok := result["PM0001"]; !ok {
-		t.Errorf("expected PM0001 in result")
-	}
+func TestLoadErrorDefinitions_Valid(t *testing.T) {
+	defs, err := LoadErrorDefinitions("testdata/valid")
+	assert.NoError(t, err)
+	assert.GreaterOrEqual(t, len(defs), 1)
+	assert.Contains(t, defs, "CM0000")
 }
 
-func TestLoadAndValidateJSON_InvalidSchema(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	jsonPath := testutils.WriteTempFile(t, "invalid.json", testutils.InvalidJSON)
-
-	_, err := errorz.LoadAndValidateJSON(schemaPath, jsonPath)
-	if err == nil || !strings.Contains(err.Error(), "validation failed") {
-		t.Errorf("expected schema validation error, got: %v", err)
-	}
+func TestLoadErrorDefinitions_DirNotFound(t *testing.T) {
+	_, err := LoadErrorDefinitions("testdata/does_not_exist")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no such file or directory")
 }
 
-func TestLoadAndValidateJSON_MalformedJSON(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	jsonPath := testutils.WriteTempFile(t, "malformed.json", testutils.MalformedJSON)
-
-	_, err := errorz.LoadAndValidateJSON(schemaPath, jsonPath)
-	if err == nil || !strings.Contains(err.Error(), "validation failed") {
-		t.Errorf("expected parse error, got: %v", err)
-	}
+func TestLoadErrorDefinitions_EmptyFile(t *testing.T) {
+	_, err := LoadErrorDefinitions("testdata/empty_file")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unmarshal error at")
 }
 
-func TestLoadAndValidateJSON_FileNotFound(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-
-	_, err := errorz.LoadAndValidateJSON(schemaPath, "not_exists.json")
-	if err == nil || !strings.Contains(err.Error(), "validation failed") {
-		t.Errorf("expected file read error, got: %v", err)
-	}
+func TestLoadErrorDefinitions_InvalidJSON(t *testing.T) {
+	_, err := LoadErrorDefinitions("testdata/invalid_json")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unmarshal error")
 }
 
-func TestLoadErrors_SuccessMultipleFiles(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	jsonPath1 := testutils.WriteTempFile(t, "file1.json", testutils.ValidJSON)
-	jsonPath2 := testutils.WriteTempFile(t, "file2.json", strings.Replace(testutils.ValidJSON, "PM0001", "PM0002", 1))
-
-	errors, err := errorz.LoadErrors(schemaPath, []string{jsonPath1, jsonPath2})
-	if err != nil {
-		t.Fatalf("expected no error, got: %v", err)
-	}
-	if len(errors) != 2 {
-		t.Errorf("expected 2 errors, got: %d", len(errors))
-	}
+func TestLoadErrorDefinitions_SkipNonJSONFiles(t *testing.T) {
+	defs, err := LoadErrorDefinitions("testdata/mixed_with_nonjson")
+	assert.NoError(t, err)
+	assert.Contains(t, defs, "CM0002")
+	assert.NotContains(t, defs, "FAKECODE")
 }
 
-func TestLoadErrors_DuplicateCode(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	jsonPath1 := testutils.WriteTempFile(t, "file1.json", testutils.ValidJSON)
-	jsonPath2 := testutils.WriteTempFile(t, "file2.json", testutils.ValidJSON) // same code: PM0001
+func TestLoadErrorDefinitions_UnreadableFile(t *testing.T) {
+	// Create a file and lock the permissions.
+	dir := t.TempDir()
+	file := filepath.Join(dir, "bad.json")
+	err := os.WriteFile(file, []byte(`{}`), 0000)
+	assert.NoError(t, err)
 
-	_, err := errorz.LoadErrors(schemaPath, []string{jsonPath1, jsonPath2})
-	if err == nil || !strings.Contains(err.Error(), "duplicate error code PM0001") {
-		t.Errorf("expected duplicate error code, got: %v", err)
-	}
+	defer os.Remove(file)
+
+	_, err = LoadErrorDefinitions(dir)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "read error")
 }
 
-func TestLoadErrors_WithInvalidFile(t *testing.T) {
-	schemaPath := testutils.WriteTempFile(t, "schema.json", testutils.SchemaJSON)
-	invalidPath := testutils.WriteTempFile(t, "bad.json", testutils.InvalidJSON)
-
-	_, err := errorz.LoadErrors(schemaPath, []string{invalidPath})
-	if err == nil || !strings.Contains(err.Error(), "validation failed") {
-		t.Errorf("expected validation failure, got: %v", err)
-	}
+func TestLoadErrorDefinitions_DuplicateKey(t *testing.T) {
+	_, err := LoadErrorDefinitions("testdata/dup_key")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "duplicate error code detected")
 }

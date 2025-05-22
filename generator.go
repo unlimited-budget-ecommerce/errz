@@ -1,22 +1,32 @@
+//go:generate go run ./cmd/gen_errors/gen.go
 package errorz
 
 import "fmt"
 
-// GenerateErrorsFromJSON validates, parses, and generates Go + Markdown error definitions
-// from a given JSON file. Outputs are grouped by domain and written to respective folders.
-func GenerateErrorsFromJSON(jsonPath string) error {
-	domainGroups, err := GroupErrorsByDomain(jsonPath)
+func Generate(outputPath, outputDirPath string, errors map[string]ErrorDefinition) error {
+	// Write the errors_gen.go file.
+	err := WriteGoFile(outputPath, errors)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write go content: %w", err)
 	}
 
-	for domain, errors := range domainGroups {
-		if err := WriteGoFile("errorz_go", domain, errors); err != nil {
-			return fmt.Errorf("failed to write Go file for domain %s: %w", domain, err)
+	domainGroups := make(map[string]map[string]ErrorDefinition)
+	for code, def := range errors {
+		domain := def.Domain
+		if domain == "" {
+			return fmt.Errorf("error code %q has empty domain", code)
 		}
 
-		if err := WriteMarkdown("errorz_doc", domain, errors); err != nil {
-			return fmt.Errorf("failed to write markdown for domain %s: %w", domain, err)
+		if _, ok := domainGroups[domain]; !ok {
+			domainGroups[domain] = make(map[string]ErrorDefinition)
+		}
+
+		domainGroups[domain][code] = def
+	}
+
+	for domain, group := range domainGroups {
+		if err := WriteMarkdownFile(outputDirPath, domain, group); err != nil {
+			return fmt.Errorf("failed to write markdown for domain %q: %w", domain, err)
 		}
 	}
 
