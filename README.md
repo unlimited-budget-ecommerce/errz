@@ -80,7 +80,10 @@ const (
 )
 
 func main() {
-  rootDir := errorz.ProjectRoot()
+  rootDir, err := errorz.ProjectRoot()
+    if err != nil {
+      log.Fatalf("cannot determine project root: %v", err)
+    }
 
   gen := errorz.Generator{
     SchemaPath:     filepath.Join(rootDir, relativeSchemaPath),
@@ -132,6 +135,10 @@ err := errorz.ErrorsMap["PM0001"] // preferred for performance
 ### Markdown generation contains
 
 - Generated in `/docs` (or configured output directory), grouped by domain and including all metadata.
+
+> **Note:**
+>
+> 👉 You can view human-readable error definitions in the `docs` directory.
 
 ## Example Error Struct
 
