@@ -7,23 +7,23 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/unlimited-budget-ecommerce/errorz"
+	errz "github.com/unlimited-budget-ecommerce/errorz"
 )
 
 const (
 	relativeSchemaPath      = "schema/error_schema.json"
 	relativeDefinitionsPath = "error_definitions"
-	outputFile              = "output/errz_gen.go"
-	outputDir               = "output/docs"
+	outputFile              = "errz_gen.go"
+	outputDir               = "docs"
 )
 
 func main() {
-	rootDir, err := errorz.ProjectRoot()
+	rootDir, err := errz.ProjectRoot()
 	if err != nil {
 		log.Fatalf("cannot determine project root: %v", err)
 	}
 
-	gen := errorz.Generator{
+	gen := errz.Generator{
 		SchemaPath:     filepath.Join(rootDir, relativeSchemaPath),
 		DefinitionsDir: filepath.Join(rootDir, relativeDefinitionsPath),
 		OutputPath:     filepath.Join(rootDir, outputFile),

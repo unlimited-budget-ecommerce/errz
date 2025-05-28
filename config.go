@@ -1,5 +1,5 @@
 //go:generate go run ./cmd/gen_errors/gen.go
-package errorz
+package errz
 
 import "golang.org/x/sync/errgroup"
 

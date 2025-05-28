@@ -67,8 +67,8 @@ import (
 const (
   relativeSchemaPath      = "schema/error_schema.json"
   relativeDefinitionsPath = "error_definitions"
-  outputFile              = "output/errz_gen.go"
-  outputDir               = "output/docs"
+  outputFile              = "errz_gen.go"
+  outputDir               = "docs"
 )
 
 func main() {
@@ -95,7 +95,7 @@ Or step-by-step (if preferred):
 ```go
 errors := errorz.LoadErrorDefinitions("error_definitions")
 errorz.ValidateAllJSONFiles("schema/error_schema.json", "error_definitions")
-errorz.Generator("output/errors_gen.go", "output/docs", errors)
+errorz.Generator("errors_gen.go", "docs", errors)
 ```
 
 ## Usage and Output
@@ -147,12 +147,12 @@ You can get a quick overview of all error codes and their meaning in `errorz_cod
 > **Note:**
 >
 > ✅ Each generated error variable implements Go's built-in `error` interface, so you can use them directly with `fmt.Println`, `return`, or any function expecting an `error`.  
-> ✅ No need to generate anything yourself. This package already includes the generated Go code in `output/errz_gen.go`.  
+> ✅ No need to generate anything yourself. This package already includes the generated Go code in `errz_gen.go`.  
 > 👉 Just import and use the variables directly!
 
 ### Markdown generation contains
 
-- Generated in `output/docs` (or configured output directory), grouped by domain and including all metadata.
+- Generated in `docs` (or configured output directory), grouped by domain and including all metadata.
 
 > **Note:**
 >

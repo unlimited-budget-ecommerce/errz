@@ -1,5 +1,5 @@
 //go:generate go run ./cmd/gen_errors/gen.go
-package errorz
+package errz
 
 import (
 	"os"
@@ -60,7 +60,7 @@ func TestGenerate_EmptyOutputPath(t *testing.T) {
 }
 
 func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
-	err := Generate(t.TempDir()+"/o/go.go", "", map[string]ErrorDefinition{
+	err := Generate(t.TempDir()+"/go.go", "", map[string]ErrorDefinition{
 		"X": {Code: "X", Domain: "abc"},
 	})
 	if err == nil || err.Error() == "" {
@@ -69,7 +69,7 @@ func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
 }
 
 func TestGenerate_EmptyDomainInError(t *testing.T) {
-	err := Generate(t.TempDir()+"/o/go.go", t.TempDir()+"/doc", map[string]ErrorDefinition{
+	err := Generate(t.TempDir()+"/go.go", t.TempDir()+"/doc", map[string]ErrorDefinition{
 		"X": {Code: "X", Domain: ""},
 	})
 	if err == nil || err.Error() == "" {
