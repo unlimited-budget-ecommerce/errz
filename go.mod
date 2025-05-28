@@ -1,4 +1,4 @@
-module github.com/unlimited-budget-ecommerce/errorz
+module github.com/unlimited-budget-ecommerce/errz
 
 go 1.24.3
 

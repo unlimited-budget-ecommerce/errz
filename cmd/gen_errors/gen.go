@@ -7,7 +7,7 @@ import (
 	"log"
 	"path/filepath"
 
-	errz "github.com/unlimited-budget-ecommerce/errorz"
+	errz "github.com/unlimited-budget-ecommerce/errz"
 )
 
 const (
