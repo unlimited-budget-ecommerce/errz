@@ -4,11 +4,7 @@
     "code": "CM0002",
     "msg": "valid",
     "cause": "valid entry",
-    "http_status": 200,
-    "category": "business",
     "severity": "low",
-    "is_retryable": false,
-    "solution": "ok",
-    "tags": ["mixed"]
+    "is_retryable": false
   }
 }

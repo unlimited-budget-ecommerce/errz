@@ -40,18 +40,16 @@ func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) (
 	builder.WriteString(NormalizeMarkdownTitle(domain))
 
 	// Write Markdown header
-	builder.WriteString("| Code | Msg | HTTP | Category | Severity | Retryable |\n")
-	builder.WriteString("|:------:|:-----:|:------:|:----------:|:----------:|:-----------:|\n")
+	builder.WriteString("| Code | Message | Severity | Retryable |\n")
+	builder.WriteString("|:-----:|:-----------:|:-----:|:-----:|\n")
 
 	// Write each error row
 	for _, code := range codes {
 		errDef := errors[code]
 		builder.WriteString(fmt.Sprintf(
-			"| %s | %s | %d | %s | %s | %t |\n",
+			"| %s | %s | %s | %t |\n",
 			errDef.Code,
 			EscapeMarkdownInline(errDef.Msg),
-			errDef.HTTPStatus,
-			errDef.Category,
 			errDef.Severity,
 			errDef.IsRetryable,
 		))
@@ -63,19 +61,12 @@ func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) (
 	for _, code := range codes {
 		errDef := errors[code]
 		builder.WriteString(fmt.Sprintf("## %s\n\n", code))
+		builder.WriteString(fmt.Sprintf("- **Domain**: %s\n", errDef.Domain))
+		builder.WriteString(fmt.Sprintf("- **Code**: %s\n", errDef.Code))
 		builder.WriteString(fmt.Sprintf("- **Message**: %s\n", EscapeMarkdownBlock(errDef.Msg)))
 		builder.WriteString(fmt.Sprintf("- **Cause**: %s\n", EscapeMarkdownBlock(errDef.Cause)))
-		builder.WriteString(fmt.Sprintf("- **Solution**: %s\n", EscapeMarkdownBlock(errDef.Solution)))
-		builder.WriteString(fmt.Sprintf("- **HTTP Status**: %d\n", errDef.HTTPStatus))
-		builder.WriteString(fmt.Sprintf("- **Category**: %s\n", errDef.Category))
 		builder.WriteString(fmt.Sprintf("- **Severity**: %s\n", errDef.Severity))
-		builder.WriteString(fmt.Sprintf("- **Retryable**: %t\n", errDef.IsRetryable))
-
-		if len(errDef.Tags) > 0 {
-			builder.WriteString("- **Tags**: ")
-			builder.WriteString("`" + strings.Join(errDef.Tags, "`, `") + "`\n\n")
-		}
-
+		builder.WriteString(fmt.Sprintf("- **Retryable**: %t\n\n", errDef.IsRetryable))
 	}
 
 	output := builder.String()

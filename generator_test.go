@@ -13,28 +13,20 @@ func TestGenerate_Success(t *testing.T) {
 
 	errors := map[string]ErrorDefinition{
 		"UR0001": {
+			Domain:      "user",
 			Code:        "USER_NOT_FOUND",
 			Msg:         "User not found",
 			Cause:       "User ID missing",
-			HTTPStatus:  404,
-			Category:    "user",
 			Severity:    "low",
 			IsRetryable: false,
-			Solution:    "Provide correct user ID",
-			Domain:      "user",
-			Tags:        []string{"auth"},
 		},
 		"OR0001": {
+			Domain:      "order",
 			Code:        "ORDER_FAILED",
 			Msg:         "Order could not be completed",
 			Cause:       "Payment issue",
-			HTTPStatus:  500,
-			Category:    "order",
 			Severity:    "critical",
 			IsRetryable: true,
-			Solution:    "Check payment system",
-			Domain:      "order",
-			Tags:        []string{"payment", "order"},
 		},
 	}
 
@@ -68,7 +60,7 @@ func TestGenerate_EmptyOutputPath(t *testing.T) {
 }
 
 func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
-	err := Generate(t.TempDir()+"/go.go", "", map[string]ErrorDefinition{
+	err := Generate(t.TempDir()+"/o/go.go", "", map[string]ErrorDefinition{
 		"X": {Code: "X", Domain: "abc"},
 	})
 	if err == nil || err.Error() == "" {
@@ -77,7 +69,7 @@ func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
 }
 
 func TestGenerate_EmptyDomainInError(t *testing.T) {
-	err := Generate(t.TempDir()+"/go.go", t.TempDir(), map[string]ErrorDefinition{
+	err := Generate(t.TempDir()+"/o/go.go", t.TempDir()+"/doc", map[string]ErrorDefinition{
 		"X": {Code: "X", Domain: ""},
 	})
 	if err == nil || err.Error() == "" {

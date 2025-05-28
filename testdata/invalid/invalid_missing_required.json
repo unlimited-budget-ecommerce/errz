@@ -3,8 +3,6 @@
     "domain": "common",
     "code": "CM0001",
     "cause": "missing message",
-    "http_status": 400,
-    "category": "validation",
     "severity": "medium",
     "is_retryable": false
   }

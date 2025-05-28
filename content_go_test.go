@@ -11,24 +11,22 @@ import (
 func TestGenerateGoContent_Basic(t *testing.T) {
 	defs := map[string]ErrorDefinition{
 		"TT0001": {
+			Domain:      "test",
 			Code:        "TT0001",
 			Msg:         "Something went wrong",
 			Cause:       "Unknown",
-			HTTPStatus:  500,
-			Category:    "Internal",
 			Severity:    "High",
 			IsRetryable: false,
-			Solution:    "Try again later",
-			Tags:        []string{"internal", "retry"},
 		},
 	}
 
 	code, err := GenerateGoContent(defs)
 	assert.NoError(t, err)
-	assert.Contains(t, code, `var ErrorMap = map[string]*Error`)
+	assert.Contains(t, code, `type Error struct {`)
+	assert.Contains(t, code, "func (e *Error) Error() string")
 	assert.Contains(t, code, `TT0001 = &Error{`)
+	assert.Contains(t, code, `Domain: "test"`)
 	assert.Contains(t, code, `Code: "TT0001"`)
-	assert.Contains(t, code, `Tags: []string{`)
 }
 
 func TestGenerateGoContent_MultipleErrorsSorted(t *testing.T) {
@@ -63,4 +61,21 @@ func TestGenerateGoContent_EmptyInput(t *testing.T) {
 	assert.Error(t, err)
 	assert.Empty(t, code)
 	assert.EqualError(t, err, "no error definitions provided")
+}
+
+func TestGenerateGoContent_ErrorMethodIncluded(t *testing.T) {
+	defs := map[string]ErrorDefinition{
+		"XX0001": {
+			Domain:      "x",
+			Code:        "XX0001",
+			Msg:         "msg",
+			Cause:       "cause",
+			Severity:    "low",
+			IsRetryable: false,
+		},
+	}
+
+	code, err := GenerateGoContent(defs)
+	assert.NoError(t, err)
+	assert.Contains(t, code, "func (e *Error) Error() string")
 }

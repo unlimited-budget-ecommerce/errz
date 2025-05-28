@@ -9,8 +9,6 @@
         "code",
         "msg",
         "cause",
-        "http_status",
-        "category",
         "severity",
         "is_retryable"
       ],
@@ -31,31 +29,12 @@
           "type": "string",
           "minLength": 1
         },
-        "http_status": {
-          "type": "integer",
-          "minimum": 100,
-          "maximum": 599
-        },
-        "category": {
-          "type": "string",
-          "enum": ["validation", "timeout", "business", "external", "internal"]
-        },
         "severity": {
           "type": "string",
           "enum": ["low", "medium", "high", "critical"]
         },
-        "solution": {
-          "type": "string"
-        },
         "is_retryable": {
           "type": "boolean"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "uniqueItems": true
         }
       },
       "additionalProperties": false

@@ -36,12 +36,8 @@ func TestWriteGoFile_Success(t *testing.T) {
 			Code:        "TEST_CODE",
 			Msg:         "This is a test error",
 			Cause:       "Just testing",
-			HTTPStatus:  500,
-			Category:    "Test",
 			Severity:    "HIGH",
 			IsRetryable: true,
-			Solution:    "Fix it",
-			Tags:        []string{"test"},
 		},
 	})
 
@@ -50,7 +46,7 @@ func TestWriteGoFile_Success(t *testing.T) {
 	data, err := os.ReadFile(tmpFile)
 	require.NoError(t, err)
 	require.Contains(t, string(data), "TEST_CODE")
-	require.Contains(t, string(data), "Fix it")
+	require.Contains(t, string(data), "HIGH")
 }
 
 func TestWriteGoFile_EmptyPath(t *testing.T) {
@@ -67,12 +63,8 @@ func TestWriteMarkdownFile_Success(t *testing.T) {
 			Code:        "TEST_MARKDOWN",
 			Msg:         "Markdown message",
 			Cause:       "Some cause",
-			HTTPStatus:  400,
-			Category:    "Doc",
 			Severity:    "LOW",
 			IsRetryable: false,
-			Solution:    "None",
-			Tags:        []string{"markdown"},
 		},
 	})
 

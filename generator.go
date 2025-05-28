@@ -1,9 +1,19 @@
 //go:generate go run ./cmd/gen_errors/gen.go
 package errorz
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
 
 func Generate(outputPath, outputDirPath string, errors map[string]ErrorDefinition) error {
+	path := strings.ToLower(outputPath)
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return fmt.Errorf("failed to create output dir: %w", err)
+	}
+
 	// Write the errors_gen.go file.
 	err := WriteGoFile(outputPath, errors)
 	if err != nil {

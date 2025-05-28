@@ -1,12 +1,12 @@
 # errorz - Centralize error library
 
-`errorz` is a centralized error code management and generation tool for Go projects. It reads structured error definitions from JSON files, validates them against a JSON Schema, and generates Go source code and Markdown documentation.
+`errz` is a centralized error code management and generation tool for Go projects. It reads structured error definitions from JSON files, validates them against a JSON Schema, and generates Go source code and Markdown documentation.
 
 ## Features
 
 - JSON Schema validation
 - Code generation for:
-  - Go: structured error variables and `ErrorsMap` for fast lookup
+  - Go: structured error variables
   - Markdown: human-readable documentation grouped by domain
 
 ## Installation
@@ -23,18 +23,14 @@ This project uses JSON files to define error definitions, validated against a JS
 - The JSON error definitions must be an object with error codes as keys.(Error codes must follow the pattern: 2 uppercase letters followed by 4 digits, e.g. `PM0001`.)
 - Each error definition must include the following fields:
 
-| Field          |   Type    |   Required    | Description                         |
-| :------------- | :-------: | :-----------: | :---------------------------------- |
-| `domain`       |  string   |      ✅       | Logical domain (e.g. `"auth"`)      |
-| `code`         |  string   |      ✅       | Unique code, like `"PM0001"`        |
-| `msg`          |  string   |      ✅       | User-friendly message               |
-| `cause`        |  string   |      ✅       | Root cause of the error             |
-| `http_status`  |  integer  |      ✅       | HTTP status code (100–599)          |
-| `category`     |  string   |      ✅       | `validation`, `business`, etc.      |
-| `severity`     |  string   |      ✅       | `low`, `medium`, `high`, `critical` |
-| `solution`     |  string   | ❌ (optional) | Suggested fix (if available)        |
-| `is_retryable` |  boolean  |      ✅       | Whether it's safe to retry          |
-| `tags`         | \[]string | ❌ (optional) | Optional grouping keywords          |
+| Field          |  Type   | Required | Description                         |
+| :------------- | :-----: | :------: | :---------------------------------- |
+| `domain`       | string  |    ✅    | Logical domain (e.g. `"auth"`)      |
+| `code`         | string  |    ✅    | Unique code, like `"PM0001"`        |
+| `msg`          | string  |    ✅    | User-friendly message               |
+| `cause`        | string  |    ✅    | Root cause of the error             |
+| `severity`     | string  |    ✅    | `low`, `medium`, `high`, `critical` |
+| `is_retryable` | boolean |    ✅    | Whether it's safe to retry          |
 
 Example error definition JSON:
 
@@ -45,12 +41,8 @@ Example error definition JSON:
     "code": "PM0001",
     "msg": "insufficient balance",
     "cause": "user has not enough balance",
-    "http_status": 402,
-    "category": "business",
     "severity": "medium",
-    "is_retryable": false,
-    "solution": "ask user to top-up or choose another method",
-    "tags": ["payment", "balance"]
+    "is_retryable": false
   }
 }
 ```
@@ -75,8 +67,8 @@ import (
 const (
   relativeSchemaPath      = "schema/error_schema.json"
   relativeDefinitionsPath = "error_definitions"
-  outputFile              = "errors_gen.go"
-  outputDir               = "docs"
+  outputFile              = "output/errz_gen.go"
+  outputDir               = "output/docs"
 )
 
 func main() {
@@ -95,8 +87,6 @@ func main() {
   if err := gen.Run(); err != nil {
     log.Fatalf("generate failed: %v", err)
   }
-
-  fmt.Println("Generated", outputFile)
 }
 ```
 
@@ -105,7 +95,7 @@ Or step-by-step (if preferred):
 ```go
 errors := errorz.LoadErrorDefinitions("error_definitions")
 errorz.ValidateAllJSONFiles("schema/error_schema.json", "error_definitions")
-errorz.Generator("errors_gen.go", "docs", errors)
+errorz.Generator("output/errors_gen.go", "output/docs", errors)
 ```
 
 ## Usage and Output
@@ -116,25 +106,53 @@ You can get a quick overview of all error codes and their meaning in `errorz_cod
 
 ### Go generation contains (Already Generated – Ready to Use)
 
-- Error struct
-- Global variables (e.g., PM0001)
-- ErrorsMap map for fast string-based lookup:
+- Error struct (implements Go's built-in `error` interface)
+- Global variables (e.g., PM0001):
+- How to Use the Generated Errors (4 Ways)
 
-```go
-err := errorz.ErrorsMap["PM0001"] // preferred for performance
-```
+  - Use as error directly
+
+  ```go
+  return errz.PM0001
+  ```
+
+  - Pretty-print with fmt.Println or log
+
+  ```go
+  fmt.Println(errz.PM0001)
+  // Output:
+  // [Domain: payment] [Code: PM0001] Msg: insufficient balance | Cause: user has not enough balance | Severity: medium | Retryable: false
+  ```
+
+  - Type assertion for accessing fields
+
+  ```go
+  var err error = errz.PM0001
+  if e, ok := err.(*errz.Error); ok {
+    fmt.Println("Error code:", e.Code)
+  }
+  ```
+
+  - Conditionally act on metadata
+
+  ```go
+  if errz.PM0002.IsRetryable {
+    retry()
+  } else {
+    alertAdmin(errz.PM0002.Msg)
+  }
+
+  ```
 
 > **Note:**
 >
-> ✅ No need to generate anything yourself. This package already includes the generated Go code.  
-> 👉 Just import and use the variables or ErrorsMap directly!
->
-> - ErrorsMap["CODE"] is recommended for dynamic lookups.
-> - Use errorz.PM0001 for static compile-time usage.
+> ✅ Each generated error variable implements Go's built-in `error` interface, so you can use them directly with `fmt.Println`, `return`, or any function expecting an `error`.  
+> ✅ No need to generate anything yourself. This package already includes the generated Go code in `output/errz_gen.go`.  
+> 👉 Just import and use the variables directly!
 
 ### Markdown generation contains
 
-- Generated in `/docs` (or configured output directory), grouped by domain and including all metadata.
+- Generated in `output/docs` (or configured output directory), grouped by domain and including all metadata.
 
 > **Note:**
 >
@@ -144,15 +162,12 @@ err := errorz.ErrorsMap["PM0001"] // preferred for performance
 
 ```go
 type Error struct {
+  Domain      string
   Code        string
   Msg         string
   Cause       string
-  HTTPStatus  int
-  Category    string
   Severity    string
   IsRetryable bool
-  Solution    string
-  Tags        []string
 }
 ```
 
@@ -162,5 +177,4 @@ type Error struct {
 
 ## Tips
 
-- Use `ErrorsMap["CODE"]` when lookup is based on string (e.g., from logs or API).
 - Keep your domain files (e.g., auth.json, payment.json) separate for clarity.

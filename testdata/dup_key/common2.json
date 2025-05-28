@@ -4,11 +4,7 @@
     "code": "CM0000",
     "msg": "uwu",
     "cause": "operation completed successfully",
-    "http_status": 200,
-    "category": "business",
     "severity": "low",
-    "is_retryable": false,
-    "solution": "no action needed",
-    "tags": ["success"]
+    "is_retryable": false
   }
 }

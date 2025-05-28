@@ -40,7 +40,7 @@ func WriteMarkdownFile(outputDirPath, domain string, errors map[string]ErrorDefi
 	domainLower := strings.ToLower(domain)
 	domainDir := filepath.Join(outputDirPath, domainLower)
 
-	if err := os.MkdirAll(domainDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(domainDir, 0755); err != nil {
 		return fmt.Errorf("failed to create documentation sub directory: %w", err)
 	}
 

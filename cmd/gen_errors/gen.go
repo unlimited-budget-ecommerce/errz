@@ -13,8 +13,8 @@ import (
 const (
 	relativeSchemaPath      = "schema/error_schema.json"
 	relativeDefinitionsPath = "error_definitions"
-	outputFile              = "errors_gen.go"
-	outputDir               = "docs"
+	outputFile              = "output/errz_gen.go"
+	outputDir               = "output/docs"
 )
 
 func main() {
