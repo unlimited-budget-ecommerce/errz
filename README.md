@@ -12,7 +12,7 @@
 ## Installation
 
 ```bash
-go get github.com/unlimited-budget-ecommerce/errorz
+go get github.com/unlimited-budget-ecommerce/errz@latest
 ```
 
 ## Configuration
@@ -61,23 +61,23 @@ import (
   "log"
   "path/filepath"
 
-  "github.com/unlimited-budget-ecommerce/errorz"
+  "github.com/unlimited-budget-ecommerce/errz"
 )
 
 const (
   relativeSchemaPath      = "schema/error_schema.json"
-  relativeDefinitionsPath = "error_definitions"
-  outputFile              = "output/errz_gen.go"
-  outputDir               = "output/docs"
+  relativeDefinitionsPath = "definitions"
+  outputFile              = "errz_gen.go"
+  outputDir               = "docs"
 )
 
 func main() {
-  rootDir, err := errorz.ProjectRoot()
+  rootDir, err := errz.ProjectRoot()
     if err != nil {
       log.Fatalf("cannot determine project root: %v", err)
     }
 
-  gen := errorz.Generator{
+  gen := errz.Generator{
     SchemaPath:     filepath.Join(rootDir, relativeSchemaPath),
     DefinitionsDir: filepath.Join(rootDir, relativeDefinitionsPath),
     OutputPath:     filepath.Join(rootDir, outputFile),
@@ -93,16 +93,17 @@ func main() {
 Or step-by-step (if preferred):
 
 ```go
-errors := errorz.LoadErrorDefinitions("error_definitions")
-errorz.ValidateAllJSONFiles("schema/error_schema.json", "error_definitions")
-errorz.Generator("output/errors_gen.go", "output/docs", errors)
+errz.ValidateAllJSONFiles("schema/error_schema.json", "definitions")
+errors := errz.LoadErrorDefinitions("definitions")
+
+errz.Generator("errz_gen.go", "docs", errors)
 ```
 
 ## Usage and Output
 
 ### Error code catalog
 
-You can get a quick overview of all error codes and their meaning in `errorz_code_catalog.md`
+You can get a quick overview of all error codes and their meaning in `errz_code_catalog.md`
 
 ### Go generation contains (Already Generated – Ready to Use)
 
@@ -147,12 +148,12 @@ You can get a quick overview of all error codes and their meaning in `errorz_cod
 > **Note:**
 >
 > ✅ Each generated error variable implements Go's built-in `error` interface, so you can use them directly with `fmt.Println`, `return`, or any function expecting an `error`.  
-> ✅ No need to generate anything yourself. This package already includes the generated Go code in `output/errz_gen.go`.  
+> ✅ No need to generate anything yourself. This package already includes the generated Go code in `errz_gen.go`.  
 > 👉 Just import and use the variables directly!
 
 ### Markdown generation contains
 
-- Generated in `output/docs` (or configured output directory), grouped by domain and including all metadata.
+- Generated in `docs` (or configured output directory), grouped by domain and including all metadata.
 
 > **Note:**
 >
