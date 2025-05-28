@@ -12,7 +12,7 @@
 ## Installation
 
 ```bash
-go get github.com/unlimited-budget-ecommerce/errorz
+go get github.com/unlimited-budget-ecommerce/errz@latest
 ```
 
 ## Configuration
@@ -61,7 +61,7 @@ import (
   "log"
   "path/filepath"
 
-  "github.com/unlimited-budget-ecommerce/errorz"
+  "github.com/unlimited-budget-ecommerce/errz"
 )
 
 const (
