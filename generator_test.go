@@ -13,20 +13,16 @@ func TestGenerate_Success(t *testing.T) {
 
 	errors := map[string]ErrorDefinition{
 		"UR0001": {
-			Domain:      "user",
-			Code:        "USER_NOT_FOUND",
-			Msg:         "User not found",
-			Cause:       "User ID missing",
-			Severity:    "low",
-			IsRetryable: false,
+			Domain: "user",
+			Code:   "USER_NOT_FOUND",
+			Msg:    "User not found",
+			Cause:  "User ID missing",
 		},
 		"OR0001": {
-			Domain:      "order",
-			Code:        "ORDER_FAILED",
-			Msg:         "Order could not be completed",
-			Cause:       "Payment issue",
-			Severity:    "critical",
-			IsRetryable: true,
+			Domain: "order",
+			Code:   "ORDER_FAILED",
+			Msg:    "Order could not be completed",
+			Cause:  "Payment issue",
 		},
 	}
 

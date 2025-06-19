@@ -20,18 +20,14 @@ func TestGenerateMarkdownContent_ValidInput(t *testing.T) {
 
 	errorsMap := map[string]ErrorDefinition{
 		"ERR001": {
-			Code:        "ERR001",
-			Msg:         "Invalid input | bad format",
-			Cause:       "Input contained unexpected value",
-			Severity:    "Low",
-			IsRetryable: false,
+			Code:  "ERR001",
+			Msg:   "Invalid input | bad format",
+			Cause: "Input contained unexpected value",
 		},
 		"ERR002": {
-			Code:        "ERR002",
-			Msg:         "Timeout `network`",
-			Cause:       "Service did not respond",
-			Severity:    "High",
-			IsRetryable: true,
+			Code:  "ERR002",
+			Msg:   "Timeout `network`",
+			Cause: "Service did not respond",
 		},
 	}
 

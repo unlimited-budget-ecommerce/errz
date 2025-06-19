@@ -47,11 +47,9 @@ func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) (
 	for _, code := range codes {
 		errDef := errors[code]
 		builder.WriteString(fmt.Sprintf(
-			"| %s | %s | %s | %t |\n",
+			"| %s | %s |\n",
 			errDef.Code,
 			EscapeMarkdownInline(errDef.Msg),
-			errDef.Severity,
-			errDef.IsRetryable,
 		))
 	}
 
@@ -65,8 +63,6 @@ func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) (
 		builder.WriteString(fmt.Sprintf("- **Code**: %s\n", errDef.Code))
 		builder.WriteString(fmt.Sprintf("- **Message**: %s\n", EscapeMarkdownBlock(errDef.Msg)))
 		builder.WriteString(fmt.Sprintf("- **Cause**: %s\n", EscapeMarkdownBlock(errDef.Cause)))
-		builder.WriteString(fmt.Sprintf("- **Severity**: %s\n", errDef.Severity))
-		builder.WriteString(fmt.Sprintf("- **Retryable**: %t\n\n", errDef.IsRetryable))
 	}
 
 	output := builder.String()
