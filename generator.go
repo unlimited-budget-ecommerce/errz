@@ -14,7 +14,7 @@ func Generate(outputPath, outputDirPath string, errors map[string]ErrorDefinitio
 		return fmt.Errorf("failed to create output dir: %w", err)
 	}
 
-	// Write the errors_gen.go file.
+	// Write the errz_gen.go file.
 	err := WriteGoFile(outputPath, errors)
 	if err != nil {
 		return fmt.Errorf("failed to write go content: %w", err)
