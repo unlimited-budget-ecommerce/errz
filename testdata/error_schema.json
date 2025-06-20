@@ -4,14 +4,7 @@
   "patternProperties": {
     "^[A-Z]{2}\\d{4}$": {
       "type": "object",
-      "required": [
-        "domain",
-        "code",
-        "msg",
-        "cause",
-        "severity",
-        "is_retryable"
-      ],
+      "required": ["domain", "code", "msg", "cause"],
       "properties": {
         "domain": {
           "type": "string",
@@ -28,13 +21,6 @@
         "cause": {
           "type": "string",
           "minLength": 1
-        },
-        "severity": {
-          "type": "string",
-          "enum": ["low", "medium", "high", "critical"]
-        },
-        "is_retryable": {
-          "type": "boolean"
         }
       },
       "additionalProperties": false

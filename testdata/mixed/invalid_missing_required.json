@@ -2,8 +2,6 @@
   "CM0003": {
     "domain": "common",
     "code": "CM0003",
-    "cause": "missing fields",
-    "severity": "medium",
-    "is_retryable": false
+    "cause": "missing fields"
   }
 }

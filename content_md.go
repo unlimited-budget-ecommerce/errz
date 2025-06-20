@@ -40,8 +40,8 @@ func GenerateMarkdownContent(domain string, errors map[string]ErrorDefinition) (
 	builder.WriteString(NormalizeMarkdownTitle(domain))
 
 	// Write Markdown header
-	builder.WriteString("| Code | Message | Severity | Retryable |\n")
-	builder.WriteString("|:-----:|:-----------:|:-----:|:-----:|\n")
+	builder.WriteString("| Code | Message |\n")
+	builder.WriteString("|:-----:|:-----------:|\n")
 
 	// Write each error row
 	for _, code := range codes {

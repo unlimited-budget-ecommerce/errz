@@ -3,8 +3,6 @@
     "domain": "common",
     "code": "CM0002",
     "msg": "valid",
-    "cause": "valid entry",
-    "severity": "low",
-    "is_retryable": false
+    "cause": "valid entry"
   }
 }
