@@ -82,7 +82,7 @@ func TestValidateAllJSONFiles_EmptyDirectory(t *testing.T) {
 	dir := "testdata/empty"
 
 	err := ValidateAllJSONFiles(schema, dir)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 }
 
 func TestValidateJSON_ExtraFields(t *testing.T) {

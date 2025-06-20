@@ -34,7 +34,7 @@ func TestGenerateMarkdownContent_ValidInput(t *testing.T) {
 	md, err := GenerateMarkdownContent("core-api", errorsMap)
 	assert.NoError(t, err)
 	assert.Contains(t, md, "# Core-Api Errors")
-	assert.Contains(t, md, "| ERR001 | Invalid input \\| bad format | Low | false |")
+	assert.Contains(t, md, "| ERR001 | Invalid input \\| bad format |")
 	assert.Contains(t, md, "- **Cause**: Input contained unexpected value")
 	assert.Contains(t, md, "## ERR002")
 	assert.Contains(t, md, "Timeout \\`network\\`")

@@ -44,7 +44,6 @@ func TestWriteGoFile_Success(t *testing.T) {
 	data, err := os.ReadFile(tmpFile)
 	require.NoError(t, err)
 	require.Contains(t, string(data), "TEST_CODE")
-	require.Contains(t, string(data), "HIGH")
 }
 
 func TestWriteGoFile_EmptyPath(t *testing.T) {

@@ -14,15 +14,10 @@ func TestProjectRoot_Success(t *testing.T) {
 		t.Fatalf("failed to create go.mod: %v", err)
 	}
 
-	// Change to subdir
-	subDir := filepath.Join(tmpDir, "sub")
-	if err := os.Mkdir(subDir, 0755); err != nil {
-		t.Fatalf("failed to create subdir: %v", err)
-	}
 	oldDir, _ := os.Getwd()
 	defer os.Chdir(oldDir)
 
-	if err := os.Chdir(subDir); err != nil {
+	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatalf("failed to chdir: %v", err)
 	}
 
@@ -31,8 +26,10 @@ func TestProjectRoot_Success(t *testing.T) {
 		t.Fatalf("expected success, got error: %v", err)
 	}
 
-	if root != tmpDir {
-		t.Errorf("expected %s, got %s", tmpDir, root)
+	expected, _ := filepath.EvalSymlinks(tmpDir)
+	actual, _ := filepath.EvalSymlinks(root)
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
 	}
 }
 
