@@ -3,24 +3,18 @@
     "domain": "common",
     "code": "CM0000",
     "msg": "success",
-    "cause": "operation completed successfully",
-    "severity": "low",
-    "is_retryable": false
+    "cause": "operation completed successfully"
   },
   "CM0400": {
     "domain": "common",
     "code": "CM0400",
     "msg": "bad request",
-    "cause": "invalid input or malformed request",
-    "severity": "medium",
-    "is_retryable": false
+    "cause": "invalid input or malformed request"
   },
   "CM0500": {
     "domain": "common",
     "code": "CM0500",
     "msg": "internal server error",
-    "cause": "unexpected server-side error",
-    "severity": "high",
-    "is_retryable": true
+    "cause": "unexpected server-side error"
   }
 }

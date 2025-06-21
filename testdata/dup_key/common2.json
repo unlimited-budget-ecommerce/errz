@@ -3,8 +3,6 @@
     "domain": "common",
     "code": "CM0000",
     "msg": "uwu",
-    "cause": "operation completed successfully",
-    "severity": "low",
-    "is_retryable": false
+    "cause": "operation completed successfully"
   }
 }

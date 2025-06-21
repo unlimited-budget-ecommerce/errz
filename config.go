@@ -4,12 +4,10 @@ package errz
 import "golang.org/x/sync/errgroup"
 
 type ErrorDefinition struct {
-	Domain      string `json:"domain"`
-	Code        string `json:"code"`
-	Msg         string `json:"msg"`
-	Cause       string `json:"cause"`
-	Severity    string `json:"severity"`
-	IsRetryable bool   `json:"is_retryable"`
+	Domain string `json:"domain"`
+	Code   string `json:"code"`
+	Msg    string `json:"msg"`
+	Cause  string `json:"cause"`
 }
 
 type Generator struct {

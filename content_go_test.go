@@ -11,12 +11,10 @@ import (
 func TestGenerateGoContent_Basic(t *testing.T) {
 	defs := map[string]ErrorDefinition{
 		"TT0001": {
-			Domain:      "test",
-			Code:        "TT0001",
-			Msg:         "Something went wrong",
-			Cause:       "Unknown",
-			Severity:    "High",
-			IsRetryable: false,
+			Domain: "test",
+			Code:   "TT0001",
+			Msg:    "Something went wrong",
+			Cause:  "Unknown",
 		},
 	}
 
@@ -66,12 +64,10 @@ func TestGenerateGoContent_EmptyInput(t *testing.T) {
 func TestGenerateGoContent_ErrorMethodIncluded(t *testing.T) {
 	defs := map[string]ErrorDefinition{
 		"XX0001": {
-			Domain:      "x",
-			Code:        "XX0001",
-			Msg:         "msg",
-			Cause:       "cause",
-			Severity:    "low",
-			IsRetryable: false,
+			Domain: "x",
+			Code:   "XX0001",
+			Msg:    "msg",
+			Cause:  "cause",
 		},
 	}
 

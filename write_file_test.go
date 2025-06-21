@@ -33,11 +33,9 @@ func TestWriteGoFile_Success(t *testing.T) {
 
 	err := WriteGoFile(tmpFile, map[string]ErrorDefinition{
 		"TEST_CODE": {
-			Code:        "TEST_CODE",
-			Msg:         "This is a test error",
-			Cause:       "Just testing",
-			Severity:    "HIGH",
-			IsRetryable: true,
+			Code:  "TEST_CODE",
+			Msg:   "This is a test error",
+			Cause: "Just testing",
 		},
 	})
 
@@ -46,7 +44,6 @@ func TestWriteGoFile_Success(t *testing.T) {
 	data, err := os.ReadFile(tmpFile)
 	require.NoError(t, err)
 	require.Contains(t, string(data), "TEST_CODE")
-	require.Contains(t, string(data), "HIGH")
 }
 
 func TestWriteGoFile_EmptyPath(t *testing.T) {
@@ -60,11 +57,9 @@ func TestWriteMarkdownFile_Success(t *testing.T) {
 
 	err := WriteMarkdownFile(tmpDir, domain, map[string]ErrorDefinition{
 		"TEST_MARKDOWN": {
-			Code:        "TEST_MARKDOWN",
-			Msg:         "Markdown message",
-			Cause:       "Some cause",
-			Severity:    "LOW",
-			IsRetryable: false,
+			Code:  "TEST_MARKDOWN",
+			Msg:   "Markdown message",
+			Cause: "Some cause",
 		},
 	})
 

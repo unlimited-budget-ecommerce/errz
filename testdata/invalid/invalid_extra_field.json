@@ -4,8 +4,6 @@
     "code": "CM0001",
     "msg": "test message",
     "cause": "test cause",
-    "severity": "low",
-    "is_retryable": false,
     "extra_field": "not allowed"
   }
 }

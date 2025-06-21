@@ -23,14 +23,12 @@ This project uses JSON files to define error definitions, validated against a JS
 - The JSON error definitions must be an object with error codes as keys.(Error codes must follow the pattern: 2 uppercase letters followed by 4 digits, e.g. `PM0001`.)
 - Each error definition must include the following fields:
 
-| Field          |  Type   | Required | Description                         |
-| :------------- | :-----: | :------: | :---------------------------------- |
-| `domain`       | string  |    ✅    | Logical domain (e.g. `"auth"`)      |
-| `code`         | string  |    ✅    | Unique code, like `"PM0001"`        |
-| `msg`          | string  |    ✅    | User-friendly message               |
-| `cause`        | string  |    ✅    | Root cause of the error             |
-| `severity`     | string  |    ✅    | `low`, `medium`, `high`, `critical` |
-| `is_retryable` | boolean |    ✅    | Whether it's safe to retry          |
+| Field    |  Type  | Required | Description                    |
+| :------- | :----: | :------: | :----------------------------- |
+| `domain` | string |    ✅    | Logical domain (e.g. `"auth"`) |
+| `code`   | string |    ✅    | Unique code, like `"PM0001"`   |
+| `msg`    | string |    ✅    | User-friendly message          |
+| `cause`  | string |    ✅    | Root cause of the error        |
 
 Example error definition JSON:
 
@@ -40,9 +38,7 @@ Example error definition JSON:
     "domain": "payment",
     "code": "PM0001",
     "msg": "insufficient balance",
-    "cause": "user has not enough balance",
-    "severity": "medium",
-    "is_retryable": false
+    "cause": "user has not enough balance"
   }
 }
 ```
@@ -122,7 +118,7 @@ You can get a quick overview of all error codes and their meaning in `errz_code_
   ```go
   fmt.Println(errz.PM0001)
   // Output:
-  // [Domain: payment] [Code: PM0001] Msg: insufficient balance | Cause: user has not enough balance | Severity: medium | Retryable: false
+  // [Domain: payment] [Code: PM0001] Msg: insufficient balance | Cause: user has not enough balance
   ```
 
   - Type assertion for accessing fields
@@ -132,17 +128,6 @@ You can get a quick overview of all error codes and their meaning in `errz_code_
   if e, ok := err.(*errz.Error); ok {
     fmt.Println("Error code:", e.Code)
   }
-  ```
-
-  - Conditionally act on metadata
-
-  ```go
-  if errz.PM0002.IsRetryable {
-    retry()
-  } else {
-    alertAdmin(errz.PM0002.Msg)
-  }
-
   ```
 
 > **Note:**
@@ -167,8 +152,6 @@ type Error struct {
   Code        string
   Msg         string
   Cause       string
-  Severity    string
-  IsRetryable bool
 }
 ```
 

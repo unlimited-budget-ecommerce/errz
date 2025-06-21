@@ -1,8 +1,8 @@
 # Auth Errors
 
-| Code | Message | Severity | Retryable |
-|:-----:|:-----------:|:-----:|:-----:|
-| AU0001 | invalid credentials | low | false |
+| Code | Message |
+|:-----:|:-----------:|
+| AU0001 | invalid credentials |
 
 ---
 
@@ -12,5 +12,3 @@
 - **Code**: AU0001
 - **Message**: invalid credentials
 - **Cause**: username or password incorrect
-- **Severity**: low
-- **Retryable**: false

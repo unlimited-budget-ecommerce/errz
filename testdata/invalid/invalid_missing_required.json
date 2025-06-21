@@ -2,8 +2,6 @@
   "CM0001": {
     "domain": "common",
     "code": "CM0001",
-    "cause": "missing message",
-    "severity": "medium",
-    "is_retryable": false
+    "cause": "missing message"
   }
 }
