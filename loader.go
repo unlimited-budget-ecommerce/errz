@@ -11,8 +11,8 @@ import (
 )
 
 // loadErrorDefinitions loads all JSON files from a directory and returns combined error definitions map.
-func loadErrorDefinitions(dir string) (map[string]ErrorDefinition, error) {
-	result := make(map[string]ErrorDefinition)
+func loadErrorDefinitions(dir string) (map[string]Error, error) {
+	result := make(map[string]Error)
 	var mu sync.Mutex
 
 	entries, err := os.ReadDir(dir)
@@ -35,7 +35,7 @@ func loadErrorDefinitions(dir string) (map[string]ErrorDefinition, error) {
 				return fmt.Errorf("read error at %s: %w", fullPath, err)
 			}
 
-			var defs map[string]ErrorDefinition
+			var defs map[string]Error
 			if err := json.Unmarshal(content, &defs); err != nil {
 				return fmt.Errorf("unmarshal error at %s: %w", fullPath, err)
 			}

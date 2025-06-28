@@ -8,7 +8,7 @@ import (
 )
 
 func TestGenerateGoContent_Basic(t *testing.T) {
-	defs := map[string]ErrorDefinition{
+	defs := map[string]Error{
 		"TT0001": {
 			Domain: "test",
 			Code:   "TT0001",
@@ -27,7 +27,7 @@ func TestGenerateGoContent_Basic(t *testing.T) {
 }
 
 func TestGenerateGoContent_MultipleErrorsSorted(t *testing.T) {
-	defs := map[string]ErrorDefinition{
+	defs := map[string]Error{
 		"ZE0001": {Code: "ZE0001", Msg: "z"},
 		"AE0001": {Code: "AE0001", Msg: "a"},
 	}
@@ -41,7 +41,7 @@ func TestGenerateGoContent_MultipleErrorsSorted(t *testing.T) {
 }
 
 func TestGenerateGoContent_EscapeCharacters(t *testing.T) {
-	defs := map[string]ErrorDefinition{
+	defs := map[string]Error{
 		"TT0001": {
 			Code: "TT0001",
 			Msg:  `quote " and newline \n`,
@@ -54,14 +54,14 @@ func TestGenerateGoContent_EscapeCharacters(t *testing.T) {
 }
 
 func TestGenerateGoContent_EmptyInput(t *testing.T) {
-	code, err := generateGoContent(map[string]ErrorDefinition{})
+	code, err := generateGoContent(map[string]Error{})
 	assert.Error(t, err)
 	assert.Empty(t, code)
 	assert.EqualError(t, err, "no error definitions provided")
 }
 
 func TestGenerateGoContent_ErrorMethodIncluded(t *testing.T) {
-	defs := map[string]ErrorDefinition{
+	defs := map[string]Error{
 		"XX0001": {
 			Domain: "x",
 			Code:   "XX0001",

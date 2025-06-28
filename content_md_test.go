@@ -17,7 +17,7 @@ func TestGenerateMarkdownContent_ValidInput(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	errorsMap := map[string]ErrorDefinition{
+	errorsMap := map[string]Error{
 		"ERR001": {
 			Code:  "ERR001",
 			Msg:   "Invalid input | bad format",
@@ -43,10 +43,10 @@ func TestGenerateMarkdownContent_InvalidDomain(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	_, err := generateMarkdownContent("bad domain", map[string]ErrorDefinition{})
+	_, err := generateMarkdownContent("bad domain", map[string]Error{})
 	assert.ErrorIs(t, err, errInvalidDomainName)
 
-	_, err = generateMarkdownContent(" ", map[string]ErrorDefinition{})
+	_, err = generateMarkdownContent(" ", map[string]Error{})
 	assert.ErrorIs(t, err, errInvalidDomainName)
 }
 
@@ -54,7 +54,7 @@ func TestGenerateMarkdownContent_EmptyErrors(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	md, err := generateMarkdownContent("example", map[string]ErrorDefinition{})
+	md, err := generateMarkdownContent("example", map[string]Error{})
 	assert.Error(t, err)
 	assert.Empty(t, md)
 	assert.EqualError(t, err, "no error definitions provided for markdown generation")
@@ -64,7 +64,7 @@ func TestGenerateMarkdownContent_Sorting(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	errorsMap := map[string]ErrorDefinition{
+	errorsMap := map[string]Error{
 		"B": {Code: "B"},
 		"A": {Code: "A"},
 	}

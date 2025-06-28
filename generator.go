@@ -22,7 +22,7 @@ type Generator struct {
 }
 
 func (g *Generator) Run() error {
-	var errors map[string]ErrorDefinition
+	var errors map[string]Error
 
 	var eg errgroup.Group
 
@@ -44,7 +44,7 @@ func (g *Generator) Run() error {
 	return generate(g.OutputPath, g.OutputDocDir, errors)
 }
 
-func generate(outputPath, outputDirPath string, errors map[string]ErrorDefinition) error {
+func generate(outputPath, outputDirPath string, errors map[string]Error) error {
 	path := strings.ToLower(outputPath)
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return fmt.Errorf("failed to create output dir: %w", err)
@@ -56,7 +56,7 @@ func generate(outputPath, outputDirPath string, errors map[string]ErrorDefinitio
 		return fmt.Errorf("failed to write go content: %w", err)
 	}
 
-	domainGroups := make(map[string]map[string]ErrorDefinition)
+	domainGroups := make(map[string]map[string]Error)
 	for code, def := range errors {
 		domain := def.Domain
 		if domain == "" {
@@ -64,7 +64,7 @@ func generate(outputPath, outputDirPath string, errors map[string]ErrorDefinitio
 		}
 
 		if _, ok := domainGroups[domain]; !ok {
-			domainGroups[domain] = make(map[string]ErrorDefinition)
+			domainGroups[domain] = make(map[string]Error)
 		}
 
 		domainGroups[domain][code] = def
@@ -82,7 +82,7 @@ func generate(outputPath, outputDirPath string, errors map[string]ErrorDefinitio
 var errLenErrors = errors.New("no error definitions provided")
 
 // generateGoContent generates the Go code content from error definitions.
-func generateGoContent(errors map[string]ErrorDefinition) (string, error) {
+func generateGoContent(errors map[string]Error) (string, error) {
 	if len(errors) == 0 {
 		return "", errLenErrors
 	}
@@ -150,7 +150,7 @@ var (
 var errInvalidDomainName = errors.New("domain name must be non-empty and alphanumeric")
 
 // generateMarkdownContent builds Markdown content for a given domain and its errors.
-func generateMarkdownContent(domain string, errors map[string]ErrorDefinition) (string, error) {
+func generateMarkdownContent(domain string, errors map[string]Error) (string, error) {
 	if strings.TrimSpace(domain) == "" || strings.ContainsAny(domain, " ./\\") {
 		return "", errInvalidDomainName
 	}
@@ -248,7 +248,7 @@ var (
 	errEmptyDir  = errors.New("directory path cannot be empty")
 )
 
-func writeGoFile(outputPath string, errors map[string]ErrorDefinition) error {
+func writeGoFile(outputPath string, errors map[string]Error) error {
 	if strings.TrimSpace(outputPath) == "" {
 		return errEmptyFile
 	}
@@ -265,7 +265,7 @@ func writeGoFile(outputPath string, errors map[string]ErrorDefinition) error {
 	return nil
 }
 
-func writeMarkdownFile(outputDirPath, domain string, errors map[string]ErrorDefinition) error {
+func writeMarkdownFile(outputDirPath, domain string, errors map[string]Error) error {
 	if strings.TrimSpace(outputDirPath) == "" {
 		return errEmptyDir
 	}

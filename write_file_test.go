@@ -30,7 +30,7 @@ func TestWriteToFile_EmptyPath(t *testing.T) {
 func TestWriteGoFile_Success(t *testing.T) {
 	tmpFile := filepath.Join(t.TempDir(), "errors.go")
 
-	err := writeGoFile(tmpFile, map[string]ErrorDefinition{
+	err := writeGoFile(tmpFile, map[string]Error{
 		"TEST_CODE": {
 			Code:  "TEST_CODE",
 			Msg:   "This is a test error",
@@ -54,7 +54,7 @@ func TestWriteMarkdownFile_Success(t *testing.T) {
 	tmpDir := t.TempDir()
 	domain := "test-domain"
 
-	err := writeMarkdownFile(tmpDir, domain, map[string]ErrorDefinition{
+	err := writeMarkdownFile(tmpDir, domain, map[string]Error{
 		"TEST_MARKDOWN": {
 			Code:  "TEST_MARKDOWN",
 			Msg:   "Markdown message",
