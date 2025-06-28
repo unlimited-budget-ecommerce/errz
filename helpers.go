@@ -13,7 +13,7 @@ func ProjectRoot() (string, error) {
 		return "", fmt.Errorf("cannot get working directory: %w", err)
 	}
 
-	for !FileExists(filepath.Join(dir, "go.mod")) && dir != "/" {
+	for !fileExists(filepath.Join(dir, "go.mod")) && dir != "/" {
 		dir = filepath.Dir(dir)
 	}
 
@@ -24,7 +24,7 @@ func ProjectRoot() (string, error) {
 	return dir, nil
 }
 
-func FileExists(path string) bool {
+func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }

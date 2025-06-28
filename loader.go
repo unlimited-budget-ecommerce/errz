@@ -11,8 +11,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// LoadErrorDefinitions loads all JSON files from a directory and returns combined error definitions map.
-func LoadErrorDefinitions(dir string) (map[string]ErrorDefinition, error) {
+// loadErrorDefinitions loads all JSON files from a directory and returns combined error definitions map.
+func loadErrorDefinitions(dir string) (map[string]ErrorDefinition, error) {
 	result := make(map[string]ErrorDefinition)
 	var mu sync.Mutex
 
