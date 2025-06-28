@@ -113,7 +113,7 @@ func generateGoContent(errors map[string]Error) (string, error) {
 
 	// Implement error interface
 	builder.WriteString("func (e *Error) Error() string {\n")
-	builder.WriteString("\treturn fmt.Sprintf(\"[Domain: %s] [Code: %s] Msg: %s | Cause: %s\",\n")
+	builder.WriteString("\treturn fmt.Sprintf(\"[%s][%s] msg: %s | cause: %s\",\n")
 	builder.WriteString("\t\te.Domain, e.Code, e.Msg, e.Cause)\n")
 	builder.WriteString("}\n\n")
 
