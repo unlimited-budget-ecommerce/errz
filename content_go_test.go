@@ -18,7 +18,7 @@ func TestGenerateGoContent_Basic(t *testing.T) {
 		},
 	}
 
-	code, err := GenerateGoContent(defs)
+	code, err := generateGoContent(defs)
 	assert.NoError(t, err)
 	assert.Contains(t, code, `type Error struct {`)
 	assert.Contains(t, code, "func (e *Error) Error() string")
@@ -33,7 +33,7 @@ func TestGenerateGoContent_MultipleErrorsSorted(t *testing.T) {
 		"AE0001": {Code: "AE0001", Msg: "a"},
 	}
 
-	code, err := GenerateGoContent(defs)
+	code, err := generateGoContent(defs)
 	assert.NoError(t, err)
 
 	zIndex := strings.Index(code, "ZE0001 = &Error{")
@@ -49,13 +49,13 @@ func TestGenerateGoContent_EscapeCharacters(t *testing.T) {
 		},
 	}
 
-	code, err := GenerateGoContent(defs)
+	code, err := generateGoContent(defs)
 	assert.NoError(t, err)
 	assert.Contains(t, code, `quote \" and newline \\n`)
 }
 
 func TestGenerateGoContent_EmptyInput(t *testing.T) {
-	code, err := GenerateGoContent(map[string]ErrorDefinition{})
+	code, err := generateGoContent(map[string]ErrorDefinition{})
 	assert.Error(t, err)
 	assert.Empty(t, code)
 	assert.EqualError(t, err, "no error definitions provided")
@@ -71,7 +71,7 @@ func TestGenerateGoContent_ErrorMethodIncluded(t *testing.T) {
 		},
 	}
 
-	code, err := GenerateGoContent(defs)
+	code, err := generateGoContent(defs)
 	assert.NoError(t, err)
 	assert.Contains(t, code, "func (e *Error) Error() string")
 }

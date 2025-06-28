@@ -14,7 +14,7 @@ func TestWriteToFile_Success(t *testing.T) {
 	tmpFile := filepath.Join(t.TempDir(), "output.txt")
 	content := "hello test"
 
-	err := WriteToFile(tmpFile, content)
+	err := writeToFile(tmpFile, content)
 	require.NoError(t, err)
 
 	// Check file content
@@ -24,14 +24,14 @@ func TestWriteToFile_Success(t *testing.T) {
 }
 
 func TestWriteToFile_EmptyPath(t *testing.T) {
-	err := WriteToFile("", "data")
-	require.ErrorIs(t, err, ErrEmptyPath)
+	err := writeToFile("", "data")
+	require.ErrorIs(t, err, errEmptyPath)
 }
 
 func TestWriteGoFile_Success(t *testing.T) {
 	tmpFile := filepath.Join(t.TempDir(), "errors.go")
 
-	err := WriteGoFile(tmpFile, map[string]ErrorDefinition{
+	err := writeGoFile(tmpFile, map[string]ErrorDefinition{
 		"TEST_CODE": {
 			Code:  "TEST_CODE",
 			Msg:   "This is a test error",
@@ -47,15 +47,15 @@ func TestWriteGoFile_Success(t *testing.T) {
 }
 
 func TestWriteGoFile_EmptyPath(t *testing.T) {
-	err := WriteGoFile("", nil)
-	require.ErrorIs(t, err, ErrEmptyFile)
+	err := writeGoFile("", nil)
+	require.ErrorIs(t, err, errEmptyFile)
 }
 
 func TestWriteMarkdownFile_Success(t *testing.T) {
 	tmpDir := t.TempDir()
 	domain := "test-domain"
 
-	err := WriteMarkdownFile(tmpDir, domain, map[string]ErrorDefinition{
+	err := writeMarkdownFile(tmpDir, domain, map[string]ErrorDefinition{
 		"TEST_MARKDOWN": {
 			Code:  "TEST_MARKDOWN",
 			Msg:   "Markdown message",
@@ -73,6 +73,6 @@ func TestWriteMarkdownFile_Success(t *testing.T) {
 }
 
 func TestWriteMarkdownFile_EmptyDir(t *testing.T) {
-	err := WriteMarkdownFile("", "domain", nil)
-	require.ErrorIs(t, err, ErrEmptyDir)
+	err := writeMarkdownFile("", "domain", nil)
+	require.ErrorIs(t, err, errEmptyDir)
 }

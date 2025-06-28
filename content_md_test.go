@@ -31,7 +31,7 @@ func TestGenerateMarkdownContent_ValidInput(t *testing.T) {
 		},
 	}
 
-	md, err := GenerateMarkdownContent("core-api", errorsMap)
+	md, err := generateMarkdownContent("core-api", errorsMap)
 	assert.NoError(t, err)
 	assert.Contains(t, md, "# Core-Api Errors")
 	assert.Contains(t, md, "| ERR001 | Invalid input \\| bad format |")
@@ -44,21 +44,21 @@ func TestGenerateMarkdownContent_InvalidDomain(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	_, err := GenerateMarkdownContent("bad domain", map[string]ErrorDefinition{})
-	assert.ErrorIs(t, err, ErrInvalidDomainName)
+	_, err := generateMarkdownContent("bad domain", map[string]ErrorDefinition{})
+	assert.ErrorIs(t, err, errInvalidDomainName)
 
-	_, err = GenerateMarkdownContent(" ", map[string]ErrorDefinition{})
-	assert.ErrorIs(t, err, ErrInvalidDomainName)
+	_, err = generateMarkdownContent(" ", map[string]ErrorDefinition{})
+	assert.ErrorIs(t, err, errInvalidDomainName)
 }
 
 func TestGenerateMarkdownContent_EmptyErrors(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	md, err := GenerateMarkdownContent("example", map[string]ErrorDefinition{})
+	md, err := generateMarkdownContent("example", map[string]ErrorDefinition{})
 	assert.Error(t, err)
 	assert.Empty(t, md)
-	assert.EqualError(t, err, "no error definitions provided")
+	assert.EqualError(t, err, "no error definitions provided for markdown generation")
 }
 
 func TestGenerateMarkdownContent_Sorting(t *testing.T) {
@@ -70,7 +70,7 @@ func TestGenerateMarkdownContent_Sorting(t *testing.T) {
 		"A": {Code: "A"},
 	}
 
-	md, err := GenerateMarkdownContent("domain", errorsMap)
+	md, err := generateMarkdownContent("domain", errorsMap)
 	assert.NoError(t, err)
 	firstIdx := strings.Index(md, "## A")
 	secondIdx := strings.Index(md, "## B")
@@ -81,8 +81,8 @@ func TestNormalizeMarkdownTitle_CachesCorrectly(t *testing.T) {
 	TitleCacheReset()
 	defer TitleCacheReset()
 
-	title1 := NormalizeMarkdownTitle("my-service")
-	title2 := NormalizeMarkdownTitle("my-service")
+	title1 := normalizeMarkdownTitle("my-service")
+	title2 := normalizeMarkdownTitle("my-service")
 
 	assert.Equal(t, "# My-Service Errors\n\n", title1)
 	assert.Equal(t, title1, title2) // from cache

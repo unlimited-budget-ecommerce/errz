@@ -26,7 +26,7 @@ func TestGenerate_Success(t *testing.T) {
 		},
 	}
 
-	err := Generate(outputGoFile, tmpDir, errors)
+	err := generate(outputGoFile, tmpDir, errors)
 	if err != nil {
 		t.Fatalf("Generate failed: %v", err)
 	}
@@ -49,14 +49,14 @@ func TestGenerate_Success(t *testing.T) {
 }
 
 func TestGenerate_EmptyOutputPath(t *testing.T) {
-	err := Generate("", t.TempDir(), map[string]ErrorDefinition{})
+	err := generate("", t.TempDir(), map[string]ErrorDefinition{})
 	if err == nil || err.Error() != "failed to write go content: output file path cannot be empty" {
 		t.Errorf("Expected output file path error, got: %v", err)
 	}
 }
 
 func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
-	err := Generate(t.TempDir()+"/go.go", "", map[string]ErrorDefinition{
+	err := generate(t.TempDir()+"/go.go", "", map[string]ErrorDefinition{
 		"X": {Code: "X", Domain: "abc"},
 	})
 	if err == nil || err.Error() == "" {
@@ -65,7 +65,7 @@ func TestGenerate_EmptyMarkdownOutputDir(t *testing.T) {
 }
 
 func TestGenerate_EmptyDomainInError(t *testing.T) {
-	err := Generate(t.TempDir()+"/go.go", t.TempDir()+"/doc", map[string]ErrorDefinition{
+	err := generate(t.TempDir()+"/go.go", t.TempDir()+"/doc", map[string]ErrorDefinition{
 		"X": {Code: "X", Domain: ""},
 	})
 	if err == nil || err.Error() == "" {
