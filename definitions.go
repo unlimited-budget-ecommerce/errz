@@ -1,4 +1,3 @@
-//go:generate go run ./cmd/gen_errors/gen.go
 package errz
 
 type ErrorDefinition struct {
