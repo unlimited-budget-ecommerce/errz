@@ -43,56 +43,10 @@ Example error definition JSON:
 }
 ```
 
-## Generator
+## Generate Error and Markdown Document
 
-### Generator Pattern
-
-Use `Generator()` for unified generation:
-
-```go
-package main
-
-import (
-  "fmt"
-  "log"
-  "path/filepath"
-
-  "github.com/unlimited-budget-ecommerce/errz"
-)
-
-const (
-  relativeSchemaPath      = "schema/error_schema.json"
-  relativeDefinitionsPath = "definitions"
-  outputFile              = "errz_gen.go"
-  outputDir               = "docs"
-)
-
-func main() {
-  rootDir, err := errz.ProjectRoot()
-    if err != nil {
-      log.Fatalf("cannot determine project root: %v", err)
-    }
-
-  gen := errz.Generator{
-    SchemaPath:     filepath.Join(rootDir, relativeSchemaPath),
-    DefinitionsDir: filepath.Join(rootDir, relativeDefinitionsPath),
-    OutputPath:     filepath.Join(rootDir, outputFile),
-    OutputDocDir:   filepath.Join(rootDir, outputDir),
-  }
-
-  if err := gen.Run(); err != nil {
-    log.Fatalf("generate failed: %v", err)
-  }
-}
-```
-
-Or step-by-step (if preferred):
-
-```go
-errz.ValidateAllJSONFiles("schema/error_schema.json", "definitions")
-errors := errz.LoadErrorDefinitions("definitions")
-
-errz.Generator("errz_gen.go", "docs", errors)
+```bash
+go generate ./...
 ```
 
 ## Usage and Output
@@ -118,7 +72,7 @@ You can get a quick overview of all error codes and their meaning in `errz_code_
   ```go
   fmt.Println(errz.PM0001)
   // Output:
-  // [Domain: payment] [Code: PM0001] Msg: insufficient balance | Cause: user has not enough balance
+  // [payment][PM0001] msg: insufficient balance | cause: user has not enough balance
   ```
 
   - Type assertion for accessing fields
@@ -144,7 +98,7 @@ You can get a quick overview of all error codes and their meaning in `errz_code_
 >
 > 👉 You can view human-readable error definitions in the `docs` directory.
 
-## Example Error Struct
+## Error Struct
 
 ```go
 type Error struct {
@@ -155,7 +109,7 @@ type Error struct {
 }
 ```
 
-## Validations
+## JSON Validation
 
 - JSON is validated using **[xeipuuv/gojsonschema](https://github.com/xeipuuv/gojsonschema.git)**
 
