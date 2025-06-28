@@ -1,5 +1,4 @@
-//go:generate go run ./cmd/gen_errors/gen.go
-package errz
+package main
 
 import (
 	"fmt"
@@ -7,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func ProjectRoot() (string, error) {
+func projectRoot() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", fmt.Errorf("cannot get working directory: %w", err)

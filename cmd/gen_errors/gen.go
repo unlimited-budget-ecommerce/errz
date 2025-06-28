@@ -18,7 +18,7 @@ const (
 )
 
 func main() {
-	rootDir, err := errz.ProjectRoot()
+	rootDir, err := projectRoot()
 	if err != nil {
 		log.Fatalf("cannot determine project root: %v", err)
 	}
