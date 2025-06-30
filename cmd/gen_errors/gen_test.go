@@ -1,5 +1,4 @@
-//go:generate go run ./cmd/gen_errors/gen.go
-package errz
+package main
 
 import (
 	"os"
@@ -21,7 +20,7 @@ func TestProjectRoot_Success(t *testing.T) {
 		t.Fatalf("failed to chdir: %v", err)
 	}
 
-	root, err := ProjectRoot()
+	root, err := projectRoot()
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -39,7 +38,7 @@ func TestProjectRoot_NotFound(t *testing.T) {
 	defer os.Chdir(oldDir)
 	os.Chdir(tmpDir)
 
-	_, err := ProjectRoot()
+	_, err := projectRoot()
 	if err == nil || err.Error() != "project root not found (no go.mod)" {
 		t.Errorf("expected not found error, got: %v", err)
 	}

@@ -12,7 +12,7 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("[Domain: %s] [Code: %s] Msg: %s | Cause: %s",
+	return fmt.Sprintf("[%s][%s] msg: %s | cause: %s",
 		e.Domain, e.Code, e.Msg, e.Cause)
 }
 
